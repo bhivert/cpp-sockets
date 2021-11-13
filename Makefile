@@ -22,7 +22,10 @@ OBJS_DIR	=	objs
 DEPS_DIR	=	deps
 
 CC_SRCS		=	
-CXX_SRCS	=	main.cpp
+CXX_SRCS	=	nw_typedef.cpp \
+				nw_exception.cpp \
+				nw_protoent.cpp \
+				main.cpp
 
 CC_INCS		=	$(shell find $(SRCS_DIR) $(INCS_DIR) -type f -name '*.h')
 CXX_INCS	=	$(shell find $(SRCS_DIR) $(INCS_DIR) -type f -name '*.hpp')
