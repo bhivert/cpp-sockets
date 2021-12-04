@@ -9,7 +9,6 @@
 # include <ostream>
 # include <string>
 # include <list>
-# include <cerrno>
 # include <cstring>
 # include <map>
 
@@ -37,15 +36,17 @@ namespace nw {
 					const std::string	to_string(void) const {
 						std::string str;
 
-						str += "{\n\t\"flags\": \"" + sock_use_str(static_cast<sock_use>(static_cast<uint8_t>(this->_flags) & static_cast<uint8_t>(sock_use::BIND))) + "\",\n";
-						str += "\t\"family\": \"" + sa_family_str(this->_family) + "\",\n";
-						str += "\t\"type\": \"" + sock_type_str(this->_type) + "\",\n";
-						str += "\t\"protocol\": " + this->_proto.to_string() + ",\n";
-						str += "\t\"sockaddr\": " + this->_addr.to_string() + ",\n";
-						str += "\t\"canonname\": " + ((this->_canonname == "null") ? this->_canonname : '\"' + this->_canonname + '\"') + "\n}";
+						str = "{ \"flags\": \"" + sock_use_str(static_cast<sock_use>(static_cast<uint8_t>(this->_flags) & static_cast<uint8_t>(sock_use::BIND))) + "\", ";
+						str += "\"family\": \"" + sa_family_str(this->_family) + "\", ";
+						str += "\"type\": \"" + sock_type_str(this->_type) + "\", ";
+						str += "\"protocol\": " + this->_proto.to_string() + ", ";
+						str += "\"sockaddr\": " + this->_addr.to_string() + ", ";
+						str += "\"canonname\": " + ((this->_canonname == "null") ? this->_canonname : '\"' + this->_canonname + '\"') + " }";
 
 						return str;
 					}
+
+					~data(void) {}
 
 				protected:
 					const sock_use		_flags;
@@ -78,18 +79,6 @@ namespace nw {
 				E_SERVICE		= EAI_SERVICE,
 				E_SOCKTYPE		= EAI_SOCKTYPE,
 				E_SYSTEM		= EAI_SYSTEM
-			};
-
-			template <error ERROR>
-			class exception : public nw::exception {
-				virtual const char *	what(void) const noexcept {
-					switch (ERROR) {
-						default:
-							return gai_strerror(static_cast<int32_t>(ERROR));
-						case error::E_SYSTEM:
-							return strerror(errno);
-					}
-				}
 			};
 
 			virtual	~addrinfo_interface(void) {}
@@ -127,31 +116,16 @@ namespace nw {
 				};
 				addrinfo_interface::type	*res;
 
-				switch (static_cast<error>(getaddrinfo(node, service, &hints, &res))) {
+				error error_code = static_cast<error>(getaddrinfo(node, service, &hints, &res));
+				switch (error_code) {
 					case error::NO_ERROR:
 						break;
 					case error::E_MEMORY:
-						throw std::bad_alloc();
-					case error::E_ADDRFAMILY:
-						throw exception<error::E_ADDRFAMILY>();
-					case error::E_AGAIN:
-						throw exception<error::E_AGAIN>();
-					case error::E_BADFLAGS:
-						throw exception<error::E_BADFLAGS>();
-					case error::E_FAIL:
-						throw exception<error::E_FAIL>();
-					case error::E_FAMILY:
-						throw exception<error::E_FAMILY>();
-					case error::E_NODATA:
-						throw exception<error::E_NODATA>();
-					case error::E_NONAME:
-						throw exception<error::E_NONAME>();
-					case error::E_SERVICE:
-						throw exception<error::E_SERVICE>();
-					case error::E_SOCKTYPE:
-						throw exception<error::E_SOCKTYPE>();
+						throw bad_alloc();
 					case error::E_SYSTEM:
-						throw exception<error::E_SYSTEM>();
+						throw system_error(errno,std::generic_category(), "addrinfo");
+					default:
+						throw logic_error(gai_strerror(static_cast<int32_t>(error_code)));
 				}
 
 				addrinfo_interface::type	*tmp = res;
@@ -187,6 +161,8 @@ namespace nw {
 			addrinfo(const addrinfo &src) = delete;
 			addrinfo(addrinfo &&src) = delete;
 
+			~addrinfo(void) = delete;
+
 			addrinfo &	operator=(const addrinfo &src) = delete;
 			addrinfo &	operator=(addrinfo &&src) = delete;
 	};
@@ -208,6 +184,8 @@ namespace nw {
 
 			addrinfo(const std::string &node, const std::string &service, const protoent &proto, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo_interface<FAMILY>(sock_use::CONNECT, node.c_str(), service.c_str(), proto, type) {}
+
+			~addrinfo(void) {};
 
 		protected:
 		private:
@@ -236,6 +214,8 @@ namespace nw {
 
 			addrinfo(const std::string &service, const protoent &proto, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo_interface<FAMILY>(sock_use::BIND, nullptr, service.c_str(), proto, type) {}
+
+			~addrinfo(void) {};
 
 		protected:
 		private:

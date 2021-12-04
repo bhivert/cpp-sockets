@@ -48,20 +48,16 @@ static void					_protoent_delete(nw::protoent::type *protoent_ptr) {
 	delete protoent_ptr;
 }
 
-const char *				nw::protoent::proto_not_found::what(void) const noexcept {
-	return "protocol not found in /etc/protocols file";
-}
-
 nw::protoent::protoent(const std::string &proto_name) : _struct(_protoent_dup(getprotobyname(proto_name.c_str())), &_protoent_delete) {
 	endprotoent();
 	if (!this->_struct)
-		throw proto_not_found();
+		throw logic_error("getprotobyname: protocol not found");
 }
 
 nw::protoent::protoent(const proto_id &proto_number) : _struct(_protoent_dup(getprotobynumber(proto_number)), &_protoent_delete) {
 	endprotoent();
 	if (!this->_struct)
-		throw proto_not_found();
+		throw logic_error("getprotobynumber: protocol not found");
 }
 
 nw::protoent::protoent(const protoent &src) : _struct(src._struct) {
@@ -73,21 +69,18 @@ nw::protoent::~protoent(void) {
 const std::string			nw::protoent::to_string(void) const {
 	std::string	str;
 
-	str = "{\n";
-	str += "\t\"name\": " + std::string(this->_struct->p_name) + ",\n";
-	str += "\t\"number\": " + std::to_string(this->_struct->p_proto) + ",\n";
-	str += "\t\"aliases\": [\n";
+	str = "{ \"name\": " + std::string(this->_struct->p_name) + ", ";
+	str += "\"number\": " + std::to_string(this->_struct->p_proto) + ", ";
+	str += "\"aliases\": [ ";
 
 	char *alias = *this->_struct->p_aliases;
 	for (size_t i = 0; alias; alias = this->_struct->p_aliases[++i]) {
-		str += "\t\t\"" + std::string(alias) + "\"";
+		str += "\"" + std::string(alias) + "\"";
 		if (this->_struct->p_aliases[i + 1])
-			str += ",\n";
-		else
-			str += '\n';
+			str += ", ";
 	}
 
-	str += "\t]}";
+	str += " ] }";
 
 	return str;
 }

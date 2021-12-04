@@ -14,7 +14,6 @@
 # include <netdb.h>
 
 # include "nw_typedef.hpp"
-# include "nw_exception.hpp"
 
 typedef struct protoent		protoent_struct;
 
@@ -25,10 +24,6 @@ namespace nw {
 	class protoent {
 		public:
 			typedef protoent_struct		type;
-
-			class proto_not_found : public nw::exception {
-				virtual const char	*what(void) const noexcept;
-			};
 
 			protoent(const std::string &proto_name);
 			protoent(const proto_id &proto_id);

@@ -12,7 +12,6 @@
 # include <cstring>
 
 # include "nw_typedef.hpp"
-# include "nw_exception.hpp"
 
 # include <arpa/inet.h>
 
@@ -22,13 +21,6 @@ namespace nw {
 			typedef struct sockaddr_storage	type;
 
 			virtual const std::string	to_string(void) const = 0;
-
-			class invalid_address : public nw::exception {
-				public:
-					const char	*what(void) const noexcept {
-						return "invalid address";
-					}
-			};
 
 			virtual const sa_family &	get_family(void) const {
 				return *reinterpret_cast<const sa_family *>(&this->_struct.ss_family);
@@ -71,7 +63,6 @@ namespace nw {
 	class addr<sa_family::INET> : public addr_storage {
 		public:
 			typedef struct sockaddr_in				type;
-			typedef addr_storage::invalid_address	invalid_adress;
 
 			class invalid_conversion : public nw::exception {
 				public:
@@ -92,7 +83,7 @@ namespace nw {
 					.sin_zero	= {0}
 				};
 				if (!inet_aton(addr.c_str(), &ref.sin_addr))
-					throw invalid_address();
+					throw logic_error("inet_aton: invalid address");
 			}
 
 			addr(const type &addr) : addr::addr() {
@@ -122,9 +113,9 @@ namespace nw {
 			const std::string	to_string(void) const {
 				std::string	str;
 
-				str = "{\n\t\"family\": \"" + sa_family_str(static_cast<sa_family>(this->_struct.sin_family)) + "\",\n";
-				str += "\t\"port\": " + std::to_string(ntohs(this->_struct.sin_port)) + ",\n";
-				str += "\t\"address\": \"" + std::string(inet_ntoa(this->_struct.sin_addr)) + "\"\n\t}";
+				str = "{ \"family\": \"" + sa_family_str(static_cast<sa_family>(this->_struct.sin_family)) + "\", ";
+				str += "\"port\": " + std::to_string(ntohs(this->_struct.sin_port)) + ", ";
+				str += "\"address\": \"" + std::string(inet_ntoa(this->_struct.sin_addr)) + "\" }";
 
 				return str;
 			}
@@ -141,21 +132,6 @@ namespace nw {
 	class addr<sa_family::INET6> : public addr_storage {
 		public:
 			typedef struct sockaddr_in6				type;
-			typedef addr_storage::invalid_address	invalid_adress;
-
-			class family_not_supported : public nw::exception {
-				public:
-					const char	*what(void) const noexcept {
-						return "inet6 family not supported";
-					}
-			};
-
-			class invalid_conversion : public nw::exception {
-				public:
-					const char	*what(void) const noexcept {
-						return "invalid conversion to inet6 family";
-					}
-			};
 
 			addr(void) : _struct(reinterpret_cast<const type &>(get_ref())) {
 				const_cast<type &>(this->_struct).sin6_family = AF_INET6;
@@ -172,9 +148,9 @@ namespace nw {
 				int8_t	ret;
 
 				if (!(ret = inet_pton(AF_INET6, addr.c_str(), &ref.sin6_addr)))
-					throw invalid_address();
+					throw logic_error("inet_pton: invalid address");
 				else if (ret == -1)
-					throw family_not_supported();
+					throw system_error(errno,std::generic_category());
 			}
 
 			addr(const type &addr) : addr::addr() {
@@ -186,7 +162,7 @@ namespace nw {
 
 			addr(const addr_storage &src) : addr(static_cast<const addr<sa_family::INET6> &>(src)._struct) {
 				if (this->_struct.sin6_family != static_cast<sa_family_t>(sa_family::INET6))
-					throw invalid_conversion();
+					throw logic_error("addr_storage: invalid conversion");
 			}
 
 			virtual	~addr(void) {}
@@ -205,11 +181,11 @@ namespace nw {
 				std::string	str;
 				char		addr[INET6_ADDRSTRLEN];
 
-				str = "{\n\t\"family\": \"" + sa_family_str(static_cast<sa_family>(this->_struct.sin6_family)) + "\",\n";
-				str += "\t\"port\": " + std::to_string(ntohs(this->_struct.sin6_port)) + ",\n";
-				str += "\t\"flowinfo\": " + std::to_string(ntohl(this->_struct.sin6_flowinfo)) + ",\n";
-				str += "\t\"address\": \"" + std::string(inet_ntop(AF_INET6, &this->_struct.sin6_addr, reinterpret_cast<char *>(&addr), sizeof(type))) + "\",\n";
-				str += "\t\"scope_id\": " + std::to_string(ntohl(this->_struct.sin6_scope_id)) + "\n\t}";
+				str = "{ \"family\": \"" + sa_family_str(static_cast<sa_family>(this->_struct.sin6_family)) + "\", ";
+				str += "\"port\": " + std::to_string(ntohs(this->_struct.sin6_port)) + ", ";
+				str += "\"flowinfo\": " + std::to_string(ntohl(this->_struct.sin6_flowinfo)) + ", ";
+				str += "\"address\": \"" + std::string(inet_ntop(AF_INET6, &this->_struct.sin6_addr, reinterpret_cast<char *>(&addr), sizeof(type))) + "\", ";
+				str += "\"scope_id\": " + std::to_string(ntohl(this->_struct.sin6_scope_id)) + " }";
 
 				return str;
 			}
@@ -296,7 +272,7 @@ namespace nw {
 
 				switch (this->get_family()) {
 					default:
-						str = "{\n\t\"family\" :\"" + sa_family_str(sa_family::UNSPEC) + "\n\t}";
+						str = "{ \"family\" :\"" + sa_family_str(sa_family::UNSPEC) + " }";
 						break ;
 					case sa_family::INET:
 						str = addr<sa_family::INET>(*this).to_string();

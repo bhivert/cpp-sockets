@@ -8,6 +8,9 @@
 */
 
 # include <string>
+# include <cerrno>
+# include <stdexcept>
+# include <system_error>
 
 # include <netdb.h>
 
@@ -20,8 +23,8 @@ namespace nw {
 	};
 
 	enum class	sock_use	: uint8_t {
-		CONNECT	= 0,
-		BIND	= AI_PASSIVE
+		CONNECT		= 0,
+		BIND		= AI_PASSIVE
 	};
 
 	enum class	sock_type : int32_t {
@@ -36,7 +39,15 @@ namespace nw {
 	typedef socklen_t	socklen;
 	typedef in_port_t	port_type;
 	typedef int32_t		proto_id;
-	typedef int32_t		fd;
+	typedef int32_t		fd_type;
+
+	typedef size_t		size_type;
+	typedef size_type	pos_type;
+
+	typedef std::exception		exception;
+	typedef std::bad_alloc		bad_alloc;
+	typedef std::logic_error	logic_error;
+	typedef std::system_error	system_error;
 
 	const std::string &	sa_family_str(const sa_family &family);
 	const std::string &	sock_use_str(const sock_use &use);
