@@ -14,8 +14,6 @@
 
 # include "nw_typedef.hpp"
 
-#include <iostream>
-
 namespace nw {
 	template <size_type SIZE>
 	class buffer {
@@ -44,7 +42,7 @@ namespace nw {
 				str = "{\n\"get_off\" : " + std::to_string(this->_off.get) + ", \n";
 				str += "\"put_off\" : " + std::to_string(this->_off.put) + ", \n";
 				str += "\"in_avail\" : " + std::to_string(this->in_avail()) + ", \n";
-				str += "\"full\" : " + std::string((this->_stats.is_full) ? "true" : "false") + ", \n";
+				str += "\"full\" : " + std::string((this->is_full()) ? "true" : "false") + ", \n";
 				str += "\"data\" : [ ";
 				for (nw::size_type i = 0; i != this->size(); ++i) {
 					str += std::to_string(this->_buf[i]);
@@ -54,28 +52,6 @@ namespace nw {
 				str += " ]\n}";
 
 				return str;
-			}
-
-			int			sync(void) {
-				if ((this->_stats.dir && this->is_full()) || (!this->_stats.dir && this->is_empty())) {
-					return 0;
-				}
-				ssize_t ret = this->_sync_fct(&this->_buf[this->_sync_off], this->_sync_avail[this->_stats.dir]());
-				if (!ret) {
-					this->_stats.eof = true;
-				} else if (ret > 0) {
-					this->_sync_off = (this->_sync_off + ret) % this->size();
-					if (this->_off.get == this->_off.put) {
-						if (this->_stats.dir) {
-							this->_stats.is_full = true;
-						} else {
-							this->_off = {0, 0};
-						}
-					}
-				} else {
-					return -1;
-				}
-				return 0;
 			}
 
 			size_type	size(void) const {
@@ -105,6 +81,28 @@ namespace nw {
 				if (this->_off.get < this->_off.put)
 					return this->_off.put - this->_off.get;
 				return (this->size() - this->_off.get) + (this->_off.put);
+			}
+
+			int			sync(void) {
+				if ((this->_stats.dir && this->is_full()) || (!this->_stats.dir && this->is_empty())) {
+					return 0;
+				}
+				ssize_t ret = this->_sync_fct(&this->_buf[this->_sync_off], this->_sync_avail[this->_stats.dir]());
+				if (!ret) {
+					this->_stats.eof = true;
+				} else if (ret > 0) {
+					this->_sync_off = (this->_sync_off + ret) % this->size();
+					if (this->_off.get == this->_off.put) {
+						if (this->_stats.dir) {
+							this->_stats.is_full = true;
+						} else {
+							this->_off = {0, 0};
+						}
+					}
+				} else {
+					return -1;
+				}
+				return 0;
 			}
 
 			size_type	getn(void *b, size_type n) {
