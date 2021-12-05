@@ -68,7 +68,7 @@ namespace nw {
 
 			void		clear(void) {
 				this->_off = {0, 0};
-				this->_stats = {false, this->_stats.sync_way};
+				this->_stats = {false, false, this->_stats.dir};
 			}
 
 			bool		eof(void) const {
