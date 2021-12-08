@@ -69,7 +69,7 @@ nw::protoent::~protoent(void) {
 const std::string			nw::protoent::to_string(void) const {
 	std::string	str;
 
-	str = "{ \"name\": " + std::string(this->_struct->p_name) + ", ";
+	str = "{ \"name\": \"" + std::string(this->_struct->p_name) + "\", ";
 	str += "\"number\": " + std::to_string(this->_struct->p_proto) + ", ";
 	str += "\"aliases\": [ ";
 

@@ -200,20 +200,35 @@ namespace nw {
 	template <sa_family FAMILY>
 	class addrinfo<sock_use::BIND, FAMILY> : public addrinfo_interface<FAMILY> {
 		public:
-			addrinfo(const std::string &service) \
+			addrinfo(std::nullptr_t, const std::string &service) \
 				: addrinfo_interface<FAMILY>(sock_use::BIND, nullptr, service.c_str()) {}
 
-			addrinfo(const std::string &service, const sock_type &type) \
+			addrinfo(std::nullptr_t, const std::string &service, const sock_type &type) \
 				: addrinfo_interface<FAMILY>(sock_use::BIND, nullptr, service.c_str(), 0, type) {}
 
-			addrinfo(const std::string &service, const std::string &proto_name, const sock_type &type = sock_type::UNSPEC) \
+			addrinfo(std::nullptr_t, const std::string &service, const std::string &proto_name, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo_interface<FAMILY>(sock_use::BIND, nullptr, service.c_str(), proto_name, type) {}
 
-			addrinfo(const std::string &service, const proto_id &proto_number, const sock_type &type = sock_type::UNSPEC) \
+			addrinfo(std::nullptr_t, const std::string &service, const proto_id &proto_number, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo_interface<FAMILY>(sock_use::BIND, nullptr, service.c_str(), proto_number, type) {}
 
-			addrinfo(const std::string &service, const protoent &proto, const sock_type &type = sock_type::UNSPEC) \
+			addrinfo(std::nullptr_t, const std::string &service, const protoent &proto, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo_interface<FAMILY>(sock_use::BIND, nullptr, service.c_str(), proto, type) {}
+
+			addrinfo(const std::string &node, const std::string &service) \
+				: addrinfo_interface<FAMILY>(sock_use::BIND, node.c_str(), service.c_str()) {}
+
+			addrinfo(const std::string &node, const std::string &service, const sock_type &type) \
+				: addrinfo_interface<FAMILY>(sock_use::BIND, node.c_str(), service.c_str(), 0, type) {}
+
+			addrinfo(const std::string &node, const std::string &service, const std::string &proto_name, const sock_type &type = sock_type::UNSPEC) \
+				: addrinfo_interface<FAMILY>(sock_use::BIND, node.c_str(), service.c_str(), proto_name, type) {}
+
+			addrinfo(const std::string &node, const std::string &service, const proto_id &proto_number, const sock_type &type = sock_type::UNSPEC) \
+				: addrinfo_interface<FAMILY>(sock_use::BIND, node.c_str(), service.c_str(), proto_number, type) {}
+
+			addrinfo(const std::string &node, const std::string &service, const protoent &proto, const sock_type &type = sock_type::UNSPEC) \
+				: addrinfo_interface<FAMILY>(sock_use::BIND, node.c_str(), service.c_str(), proto, type) {}
 
 			~addrinfo(void) {};
 

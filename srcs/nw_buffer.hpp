@@ -66,13 +66,13 @@ namespace nw {
 				return !this->_stats.is_full && this->_off.get == this->_off.put;
 			}
 
+			bool		eof(void) const {
+				return this->_stats.eof;
+			}
+
 			void		clear(void) {
 				this->_off = {0, 0};
 				this->_stats = {false, false, this->_stats.dir};
-			}
-
-			bool		eof(void) const {
-				return this->_stats.eof;
 			}
 
 			size_type	in_avail(void) const {
@@ -90,7 +90,9 @@ namespace nw {
 				ssize_t ret = this->_sync_fct(&this->_buf[this->_sync_off], this->_sync_avail[this->_stats.dir]());
 				if (!ret) {
 					this->_stats.eof = true;
-				} else if (ret > 0) {
+					return 0;
+				}
+				if (ret > 0) {
 					this->_sync_off = (this->_sync_off + ret) % this->size();
 					if (this->_off.get == this->_off.put) {
 						if (this->_stats.dir) {
@@ -99,10 +101,9 @@ namespace nw {
 							this->_off = {0, 0};
 						}
 					}
-				} else {
-					return -1;
+					return 0;
 				}
-				return 0;
+				return -1;
 			}
 
 			size_type	getn(void *b, size_type n) {
