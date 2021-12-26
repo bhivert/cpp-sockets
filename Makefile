@@ -8,7 +8,7 @@ CC			=	gcc
 CCFLAGS		=	-Wall -Wextra -I$(INCS_DIR)
 
 CXX			=	g++
-CXXFLAGS	=	-Wall -Wextra -std=c++11 -I$(INCS_DIR)
+CXXFLAGS	=	-g -Wall -Wextra -std=c++11 -I$(INCS_DIR)
 
 LDFLAGS		=
 LDLIBS		=
@@ -23,7 +23,6 @@ DEPS_DIR	=	deps
 
 CC_SRCS		=	
 CXX_SRCS	=	nw_typedef.cpp \
-				nw_exception.cpp \
 				nw_protoent.cpp \
 				main.cpp
 

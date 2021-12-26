@@ -18,14 +18,14 @@ const std::string &	nw::sa_family_str(const nw::sa_family &family) {
 	return s_family_str.at(family);
 }
 
-static const std::map<const nw::sock_use, const std::string>	s_use_str = {
-	{nw::sock_use::CONNECT,	"CONNECT"},
-	{nw::sock_use::BIND,		"BIND"},
-};
-
-const std::string &	nw::sock_use_str(const nw::sock_use &use) {
-	return s_use_str.at(use);
-}
+//static const std::map<const nw::sock_use, const std::string>	s_use_str = {
+//	{nw::sock_use::CONNECT,	"CONNECT"},
+//	{nw::sock_use::BIND,		"BIND"},
+//};
+//
+//const std::string &	nw::sock_use_str(const nw::sock_use &use) {
+//	return s_use_str.at(use);
+//}
 
 static const std::map<const nw::sock_type, const std::string>	s_type_str = {
 	{nw::sock_type::STREAM,		"STREAM"},

@@ -19,7 +19,7 @@ typedef struct protoent		protoent_struct;
 
 namespace nw {
 	template <sa_family FAMILY>
-		class addrinfo_interface;
+	class addrinfo;
 
 	class protoent {
 		public:
@@ -38,7 +38,7 @@ namespace nw {
 			std::shared_ptr<const type>	_struct;
 
 			template <sa_family FAMILY>
-			friend class addrinfo_interface;
+			friend class addrinfo;
 
 		private:
 			protoent(void) = delete;
