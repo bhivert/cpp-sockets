@@ -31,7 +31,10 @@ namespace nw {
 				_buf{0}, \
 				_stats{false, false, static_cast<bool>(d)}, \
 				_off{0, 0}, \
-				_sync_off(static_cast<bool>(d) ? this->_off.put : this->_off.get) {
+				_sync_off(static_cast<bool>(d) ? this->_off.put : this->_off.get), \
+				_sync_avail_fct(static_cast<bool>(d) \
+					? std::function<size_type(void)>([this](){ return (this->_off.put < this->_off.get) ? this->_off.get - this->_off.put : this->size() - this->_off.put; }) \
+					: std::function<size_type(void)>([this](){ return (this->_off.get < this->_off.put) ? this->_off.put - this->_off.get : this->size() - this->_off.get; }) ) {
 			}
 
 			virtual	~buffer(void) {}
@@ -87,7 +90,7 @@ namespace nw {
 				if ((this->_stats.dir && this->is_full()) || (!this->_stats.dir && this->is_empty())) {
 					return 0;
 				}
-				ssize_t ret = this->_sync_fct(&this->_buf[this->_sync_off], this->_sync_avail[this->_stats.dir]());
+				ssize_t ret = this->_sync_fct(&this->_buf[this->_sync_off], this->_sync_avail_fct());
 				if (!ret) {
 					this->_stats.eof = true;
 					return 0;
@@ -125,11 +128,11 @@ namespace nw {
 
 				if (gb_size) {
 					std::memcpy(b, this->_buf + this->_off.get, gb_size);
-					this->_off.get += gb_size;
+					this->_off.get = (this->_off.get + gb_size) % this->size();
 				}
 				if (gf_size) {
 					std::memcpy(static_cast<int8_t *>(b) + gb_size, this->_buf, gf_size);
-					this->_off.get = gf_size;
+					this->_off.get = (this->_off.get + gf_size) % this->size();
 				}
 				if (this->_off.get == this->_off.put)
 					this->_off = {0, 0};
@@ -154,11 +157,11 @@ namespace nw {
 
 				if (pb_size) {
 					std::memcpy(this->_buf + this->_off.put, b, pb_size);
-					this->_off.put += pb_size;
+					this->_off.put = (this->_off.put + pb_size) % this->size();
 				}
 				if (pf_size) {
 					std::memcpy(this->_buf, static_cast<const int8_t *>(b) + pb_size, pf_size);
-					this->_off.put = pf_size;
+					this->_off.put = (this->_off.put + pf_size) % this->size();
 				}
 				if (this->_off.get == this->_off.put)
 					this->_stats.is_full = true;
@@ -179,12 +182,8 @@ namespace nw {
 				size_type	put;
 			}				_off;
 
-			size_type		&_sync_off;
-
-			std::function<size_type(void)>	_sync_avail[2] = {
-				[this](){ return (this->_off.get < this->_off.put) ? this->_off.put - this->_off.get : this->size() - this->_off.get; },
-				[this](){ return (this->_off.put < this->_off.get) ? this->_off.get - this->_off.put : this->size() - this->_off.put; }
-			};
+			size_type								&_sync_off;
+			const std::function<size_type(void)>	_sync_avail_fct;
 
 		private:
 			buffer(const buffer &src) = delete;
