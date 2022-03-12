@@ -24,34 +24,34 @@ namespace nw {
 	template<sa_family FAMILY>
 	class addrinfo {
 		public:
-			addrinfo(std::nullptr_t, const std::string &service) \
+			addrinfo(const std::string &service, std::nullptr_t) \
 				: addrinfo<FAMILY>(sock_type::UNSPEC, nullptr, service.c_str()) {}
 
-			addrinfo(std::nullptr_t, const std::string &service, const sock_type &type) \
+			addrinfo(const std::string &service, std::nullptr_t, const sock_type &type) \
 				: addrinfo<FAMILY>(type, nullptr, service.c_str(), 0) {}
 
-			addrinfo(std::nullptr_t, const std::string &service, const std::string &proto_name, const sock_type &type = sock_type::UNSPEC) \
+			addrinfo(const std::string &service, std::nullptr_t, const std::string &proto_name, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo<FAMILY>(type, nullptr, service.c_str(), proto_name) {}
 
-			addrinfo(std::nullptr_t, const std::string &service, const proto_id &proto_number, const sock_type &type = sock_type::UNSPEC) \
+			addrinfo(const std::string &service, std::nullptr_t, const proto_id &proto_number, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo<FAMILY>(type, nullptr, service.c_str(), proto_number) {}
 
-			addrinfo(std::nullptr_t, const std::string &service, const protoent &proto, const sock_type &type = sock_type::UNSPEC) \
+			addrinfo(const std::string &service, std::nullptr_t, const protoent &proto, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo<FAMILY>(type, nullptr, service.c_str(), proto) {}
 
-			addrinfo(const std::string &node, const std::string &service) \
+			addrinfo(const std::string &service, const std::string &node) \
 				: addrinfo<FAMILY>(sock_type::UNSPEC, node.c_str(), service.c_str()) {}
 
-			addrinfo(const std::string &node, const std::string &service, const sock_type &type) \
+			addrinfo(const std::string &service, const std::string &node, const sock_type &type) \
 				: addrinfo<FAMILY>(type, node.c_str(), service.c_str(), 0) {}
 
-			addrinfo(const std::string &node, const std::string &service, const std::string &proto_name, const sock_type &type = sock_type::UNSPEC) \
+			addrinfo(const std::string &service, const std::string &node, const std::string &proto_name, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo<FAMILY>(type, node.c_str(), service.c_str(), proto_name) {}
 
-			addrinfo(const std::string &node, const std::string &service, const proto_id &proto_number, const sock_type &type = sock_type::UNSPEC) \
+			addrinfo(const std::string &service, const std::string &node, const proto_id &proto_number, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo<FAMILY>(type, node.c_str(), service.c_str(), proto_number) {}
 
-			addrinfo(const std::string &node, const std::string &service, const protoent &proto, const sock_type &type = sock_type::UNSPEC) \
+			addrinfo(const std::string &service, const std::string &node, const protoent &proto, const sock_type &type = sock_type::UNSPEC) \
 				: addrinfo<FAMILY>(type, node.c_str(), service.c_str(), proto) {}
 
 			virtual	~addrinfo(void) {}
@@ -119,21 +119,6 @@ namespace nw {
 
 			const std::list<data>		_addrinfo_list;
 
-			enum class	error : int32_t {
-				NO_ERROR		= 0,
-				E_ADDRFAMILY	= EAI_ADDRFAMILY,
-				E_AGAIN			= EAI_AGAIN,
-				E_BADFLAGS		= EAI_BADFLAGS,
-				E_FAIL			= EAI_FAIL,
-				E_FAMILY		= EAI_FAMILY,
-				E_MEMORY		= EAI_MEMORY,
-				E_NODATA		= EAI_NODATA,
-				E_NONAME		= EAI_NONAME,
-				E_SERVICE		= EAI_SERVICE,
-				E_SOCKTYPE		= EAI_SOCKTYPE,
-				E_SYSTEM		= EAI_SYSTEM
-			};
-
 			addrinfo(const sock_type &type, const char *node = nullptr, const char *service = nullptr, const protoent &proto = 0) {
 				uint8_t	flags;
 
@@ -152,14 +137,14 @@ namespace nw {
 				};
 				addrinfo::type	*res;
 
-				error error_code = static_cast<error>(getaddrinfo(node, service, &hints, &res));
+				int32_t error_code = getaddrinfo(node, service, &hints, &res);
 				switch (error_code) {
-					case error::NO_ERROR:
+					case 0:
 						break;
-					case error::E_MEMORY:
+					case EAI_MEMORY:
 						throw bad_alloc();
-					case error::E_SYSTEM:
-						throw system_error(errno,std::generic_category(), "addrinfo");
+					case EAI_SYSTEM:
+						throw system_error(errno, std::generic_category(), "addrinfo");
 					default:
 						throw logic_error(gai_strerror(static_cast<int32_t>(error_code)));
 				}
