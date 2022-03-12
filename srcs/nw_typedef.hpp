@@ -22,11 +22,6 @@ namespace nw {
 		INET6V4M	= static_cast<sa_family_t>(~0)
 	};
 
-//	enum class	sock_use	: uint8_t {
-//		CONNECT		= 0,
-//		BIND		= AI_PASSIVE
-//	};
-
 	enum class	sock_type : int32_t {
 		UNSPEC		= 0,
 		STREAM		= SOCK_STREAM,
@@ -36,10 +31,10 @@ namespace nw {
 		RDM			= SOCK_RDM
 	};
 
-	typedef socklen_t	socklen;
+	typedef socklen_t	socklen_type;
 	typedef in_port_t	port_type;
 	typedef int32_t		proto_id;
-	typedef int32_t		fd_type;
+	typedef int32_t		sockfd_type;
 
 	typedef size_t		size_type;
 	typedef size_type	pos_type;
@@ -50,7 +45,6 @@ namespace nw {
 	typedef std::system_error	system_error;
 
 	const std::string &	sa_family_str(const sa_family &family);
-//	const std::string &	sock_use_str(const sock_use &use);
 	const std::string &	sock_type_str(const sock_type &type);
 };
 
