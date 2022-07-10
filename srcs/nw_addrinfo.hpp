@@ -2,9 +2,9 @@
 # define __NW_ADDRINFO_HPP__
 
 /*!
-@file nw_addrinfo.hpp
-@brief ...
-*/
+  @file nw_addrinfo.hpp
+  @brief ...
+  */
 
 # include <ostream>
 # include <string>
@@ -74,8 +74,7 @@ namespace nw {
 			class data {
 				public:
 					data(const int32_t &flags, const sa_family &family, const sock_type &type, const protoent &proto, const addr<FAMILY> &addr, const std::string &canonname) \
-						: _flags(flags), _family(family), _type(type), _proto(proto), _addr(addr), _canonname(canonname) {
-					}
+						: _flags(flags), _family(family), _type(type), _proto(proto), _addr(addr), _canonname(canonname) {}
 
 					data(const data &src) : _flags(src._flags), _family(src._family), _type(src._type), _proto(src._proto), _addr(src._addr), _canonname(src._canonname) {}
 					data(data &&src) : _flags(src._flags), _family(src._family), _type(src._type), _proto(src._proto), _addr(src._addr), _canonname(src._canonname) {}

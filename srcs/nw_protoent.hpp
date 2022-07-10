@@ -40,6 +40,9 @@ namespace nw {
 			template <sa_family FAMILY>
 			friend class addrinfo;
 
+			template <sa_family FAMILY, sock_type TYPE>
+			friend class socket;
+
 		private:
 			protoent(void) = delete;
 			protoent(protoent &&src) = delete;

@@ -18,7 +18,6 @@ namespace nw {
 	template <size_type SIZE>
 	class buffer {
 		public:
-
 			enum class	dir	: bool {
 				out	= 0,
 				in	= 1
