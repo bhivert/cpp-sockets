@@ -2,9 +2,9 @@
 # define __NW_ADDRINFO_HPP__
 
 /*!
-  @file nw_addrinfo.hpp
-  @brief ...
-  */
+@file nw_addrinfo.hpp
+@brief ...
+*/
 
 # include <ostream>
 # include <string>

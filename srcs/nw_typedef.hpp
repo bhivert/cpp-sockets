@@ -14,21 +14,22 @@
 
 # include <netdb.h>
 
+//! NetWork namespace
 namespace nw {
 	enum class	sa_family : sa_family_t {
-		UNSPEC		= AF_UNSPEC,
-		INET		= AF_INET,
-		INET6		= AF_INET6,
-		INET6V4M	= static_cast<sa_family_t>(~0)
+		UNSPEC		= AF_UNSPEC,					//!< Unspecified Internet protocols
+		INET		= AF_INET,						//!< IPv4 Internet protocols
+		INET6		= AF_INET6,						//!< IPv6 Internet protocols
+		INET6V4M	= static_cast<sa_family_t>(~0)	//!< IPv6 with IPv4 mapped Internet protocols
 	};
 
 	enum class	sock_type : int32_t {
-		UNSPEC		= 0,
-		STREAM		= SOCK_STREAM,
-		DGRAM		= SOCK_DGRAM,
-		SEQPACKET	= SOCK_SEQPACKET,
-		RAW			= SOCK_RAW,
-		RDM			= SOCK_RDM
+		UNSPEC		= 0,				//!< Unspecified socket type
+		STREAM		= SOCK_STREAM,		//!< Provides sequenced, reliable, two-way, connection-based byte streams. An out-of-band data transmission mechanism may be supported.
+		DGRAM		= SOCK_DGRAM,		//!< Supports datagrams (connectionless, unreliable messages of a fixed maximum length).
+		SEQPACKET	= SOCK_SEQPACKET,	//!< Provides a sequenced, reliable, two-way connection-based data transmission path for datagrams of fixed maximum length; a consumer is required to read an entire packet with each input system call.
+		RAW			= SOCK_RAW,			//!< Provides raw network protocol access.
+		RDM			= SOCK_RDM			//!< Provides a reliable datagram layer that does not guarantee ordering.
 	};
 
 	typedef socklen_t	socklen_type;

@@ -16,20 +16,12 @@
 # include <arpa/inet.h>
 
 namespace nw {
-	template <sa_family FAMILY>
-	class socket_interface;
-
+	//! protected address storage class
 	class addr_storage {
 		public:
-			typedef struct sockaddr_storage	type;
-
-			virtual const std::string	to_string(void) const = 0;
-
-			virtual const sa_family &	get_family(void) const {
-				return *reinterpret_cast<const sa_family *>(&this->_struct.ss_family);
-			}
-
 		protected:
+			using type = struct sockaddr_storage;
+
 			const type			_struct;
 			const socklen_type	_sizeof;
 
@@ -37,7 +29,13 @@ namespace nw {
 
 			virtual	~addr_storage(void) {}
 
-			const type &	get_ref(void) const {
+			virtual const std::string	to_string(void) const = 0;
+
+			virtual const sa_family &	get_family(void) const {
+				return *reinterpret_cast<const sa_family *>(&this->_struct.ss_family);
+			}
+
+			const type &				get_ref(void) const {
 				return this->_struct;
 			}
 
@@ -50,12 +48,16 @@ namespace nw {
 			virtual addr_storage &	operator=(addr_storage &&src) = delete;
 	};
 
+	//! @tparam FAMILY ::sa_family
 	template<sa_family FAMILY>
-	class addr : public addr_storage {
+	//! deleted address template
+	class addr : protected addr_storage {
 		private:
 			addr(void) = delete;
 			addr(const addr &src) = delete;
 			addr(addr &&src) = delete;
+
+			virtual	~addr(void) {}
 
 			virtual const std::string	to_string(void) const = delete;
 
@@ -64,9 +66,10 @@ namespace nw {
 	};
 
 	template <>
-	class addr<sa_family::INET> : public addr_storage {
+	//! IPv4 address class
+	class addr<sa_family::INET> : protected addr_storage {
 		public:
-			typedef struct sockaddr_in				type;
+			using type = struct sockaddr_in;
 
 			addr(void) : _struct(reinterpret_cast<const type &>(get_ref())) {
 				const_cast<type &>(this->_struct).sin_family = AF_INET;
@@ -123,16 +126,17 @@ namespace nw {
 
 			friend addr<sa_family::UNSPEC>;
 
-			template <sa_family FAMILY>
-			friend class socket_interface;
+			template <sa_family, sock_type>
+			friend class socket;
 
 		private:
 	};
 
 	template <>
-	class addr<sa_family::INET6> : public addr_storage {
+	//! IPv6 address class
+	class addr<sa_family::INET6> : protected addr_storage {
 		public:
-			typedef struct sockaddr_in6				type;
+			using type = struct sockaddr_in6;
 
 			addr(void) : _struct(reinterpret_cast<const type &>(get_ref())) {
 				const_cast<type &>(this->_struct).sin6_family = AF_INET6;
@@ -197,16 +201,17 @@ namespace nw {
 
 			friend addr<sa_family::UNSPEC>;
 
-			template <sa_family FAMILY>
-			friend class socket_interface;
+			template <sa_family, sock_type>
+			friend class socket;
 
 		private:
 	};
 
 	template <>
-	class addr<sa_family::INET6V4M> : public addr<sa_family::INET6> {
+	//! IPv6 with IPv4 mapped address class
+	class addr<sa_family::INET6V4M> : protected addr<sa_family::INET6> {
 		public:
-			typedef addr<sa_family::INET6>::type		type;
+			using type = addr<sa_family::INET6>::type;
 
 			addr(void) : addr<sa_family::INET6>::addr() {}
 			addr(const type &addr) : nw::addr<sa_family::INET6>::addr(addr) {}
@@ -227,14 +232,21 @@ namespace nw {
 				return *this;
 			}
 
+			const std::string	to_string(void) const {
+				return addr<sa_family::INET6>::to_string();
+			}
+
 		protected:
+			friend addr<sa_family::UNSPEC>;
+
 		private:
 	};
 
 	template <>
-	class addr<sa_family::UNSPEC> : public addr_storage {
+	//! unspecified IP address class
+	class addr<sa_family::UNSPEC> : protected addr_storage {
 		public:
-			typedef addr_storage::type	type;
+			using type = addr_storage::type;
 
 			addr(void) : _struct(reinterpret_cast<const type &>(get_ref())) {
 				const_cast<type &>(this->_struct).ss_family = AF_UNSPEC;
@@ -296,6 +308,9 @@ namespace nw {
 
 		protected:
 			const type	&_struct;
+
+			template <sa_family, sock_type>
+			friend class socket;
 
 		private:
 	};

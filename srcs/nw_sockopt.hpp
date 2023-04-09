@@ -36,7 +36,6 @@ std::ostream &	operator<<(std::ostream &o, const nw::sockopt &C);
 
 #endif
 
-
 //SO_ACCEPTCONN
 //SO_ATTACH_FILTER (since Linux 2.2), SO_ATTACH_BPF (since Linux 3.19)
 //SO_ATTACH_REUSEPORT_CBPF, SO_ATTACH_REUSEPORT_EBPF

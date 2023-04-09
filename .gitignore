@@ -1,4 +1,8 @@
 *.sw*
 *.d
 *.o
+/deps
+.vscode
+/html
+/latex
 sockets_test

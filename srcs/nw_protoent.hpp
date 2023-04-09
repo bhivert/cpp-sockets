@@ -3,7 +3,7 @@
 # define __NW_PROTOENT_HPP__
 
 /*!
-@file nw_proto.hpp
+@file nw_protoent.hpp
 @brief ...
 */
 

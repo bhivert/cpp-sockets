@@ -3,7 +3,7 @@
 #include <iostream>
 
 //#include "nw_addr.hpp"
-//#include "nw_addrinfo.hpp"
+#include "nw_addrinfo.hpp"
 //#include "nw_protoent.hpp"
 //#include "nw_buffer.hpp"
 
@@ -70,21 +70,24 @@ int	main(int ac, char *av[]) try {
 //
 //	b.clear();
 
-//	std::cout << nw::addrinfo<nw::sa_family::INET>("192.168.1.9", "80", "tcp") << std::endl;
-//	std::cout << nw::addrinfo<nw::sa_family::INET6V4M>("google.fr", "80", "tcp") << std::endl;
-//	std::cout << nw::addrinfo<nw::sa_family::UNSPEC>("google.fr", "80", 0, nw::sock_type::UNSPEC) << std::endl;
+	std::cout << nw::addrinfo<nw::sa_family::INET>("80", "google.fr", "tcp") << std::endl;
+	std::cout << nw::addrinfo<nw::sa_family::INET6V4M>("80", "google.fr", "tcp") << std::endl;
+	std::cout << nw::addrinfo<nw::sa_family::UNSPEC>("80", "google.fr", 0, nw::sock_type::UNSPEC) << std::endl;
 
 //	nw::socket<nw::sa_family::INET>({"80", "192.168.1.9", "tcp"});
-	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM>	so("tcp");
-	std::cout << so << std::endl;
-	so.bind(80);
-	std::cout << so << std::endl;
-	so.listen(10);
-	std::cout << so << std::endl;
-	nw::socket<nw::sa_family::UNSPEC, nw::sock_type::STREAM> so0 = so.accept();
-	std::cout << so0 << std::endl;
-	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> so1 = so.accept();
-	std::cout << so1 << std::endl;
+
+//	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM>	so("tcp");
+//	std::cout << so << std::endl;
+//	so.bind(80);
+//	std::cout << so << std::endl;
+//	so.listen(10);
+//	std::cout << so << std::endl;
+//	nw::socket<nw::sa_family::UNSPEC, nw::sock_type::STREAM> so0 = so.accept();
+//	std::cout << so0 << std::endl;
+//	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> so1 = so.accept();
+//	std::cout << so1 << std::endl;
+
+	std::cout << SO_REUSEADDR << std::endl;
 
 	return EXIT_SUCCESS;
 	static_cast<void>(ac);

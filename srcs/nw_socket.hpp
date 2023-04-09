@@ -27,9 +27,22 @@ static const std::function<int(int, struct sockaddr *, socklen_t *)>		_s_accept 
 //# include "nw_buffer.hpp"
 
 namespace nw {
+	//! @tparam FAMILY ::sa_family
 	template <sa_family FAMILY>
-	class socket_interface {
+	//! protected socket storage class
+	class socket_storage {
 		public:
+		protected:
+			const sock_type		_type;
+			const protoent		_proto;
+			const sockfd_type	_fd;
+			addr<FAMILY>		_addr;
+
+			socket_storage(const sock_type &type, const protoent &proto, const sockfd_type &fd) \
+				: _type(type), _proto(proto), _fd(fd) {}
+			socket_storage(const sock_type &type, const protoent &proto, const sockfd_type &fd, const addr<FAMILY> &a) \
+				: _type(type), _proto(proto), _fd(fd), _addr(a) {}
+
 			virtual const std::string	to_string(void) const {
 				std::string	str;
 
@@ -41,67 +54,59 @@ namespace nw {
 				return str;
 			};
 
+			virtual	~socket_storage(void) {}
+
+			template <sa_family, sock_type>
+			friend class socket;
+
+		private:
+			socket_storage(const socket_storage &src) = delete;
+			socket_storage(socket_storage &&src) = delete;
+
+			socket_storage &	operator=(const socket_storage &src) = delete;
+			socket_storage &	operator=(socket_storage &&src) = delete;
+	};
+
+	//! @tparam FAMILY ::sa_family
+	//! @tparam TYPE ::sock_type
+	template <sa_family FAMILY, sock_type TYPE>
+	//! socket template
+	class socket : protected socket_storage<FAMILY> {
+		public:
+			socket(const int &proto_id) : socket(nw::protoent(proto_id)) {}
+			socket(const std::string &proto_name) : socket(nw::protoent(proto_name)) {}
+			socket(const protoent &proto) \
+				: socket_storage<FAMILY>(TYPE, proto, _s_socket(static_cast<int32_t>(FAMILY), static_cast<int32_t>(TYPE), proto._struct->p_proto)) {
+				if (this->_fd == -1)
+					throw system_error(errno, std::generic_category(), "socket");
+			}
+
+			socket(const socket<FAMILY, TYPE> &src) \
+				: socket_storage<FAMILY>(src._type, src._proto, src._fd, src._addr) {}
+			socket(socket<FAMILY, TYPE> &&src) \
+				: socket_storage<FAMILY>(src._type, src._proto, src._fd, src._addr) {}
+
+			socket(const socket<sa_family::UNSPEC, TYPE> &src) \
+				: socket_storage<FAMILY>(src._type, src._proto, src._fd, src._addr) {}
+			socket(socket<sa_family::UNSPEC, TYPE> &&src) \
+				: socket_storage<FAMILY>(src._type, src._proto, src._fd, src._addr) {}
+
 			void	listen(int backlog) {
 				if (_s_listen(this->_fd, backlog) == -1)
 					throw system_error(errno, std::generic_category(), "listen");
 			}
 
 			void	bind(const addr<FAMILY> &addr) {
-				this->_addr = addr;
-				if (_s_bind(this->_fd, reinterpret_cast<const sockaddr *>(&this->_addr._struct), this->_addr._sizeof) == -1)
+				if (_s_bind(this->_fd, reinterpret_cast<const sockaddr *>(&addr._struct), addr._sizeof) == -1)
 					throw system_error(errno, std::generic_category(), "bind");
+				this->_addr = addr;
 			}
 
 			void	connect(const addr<FAMILY> &addr) {
-				this->_addr = addr;
-				if (_s_connect(this->_fd, reinterpret_cast<const sockaddr *>(&this->_addr._struct), this->_addr._sizeof) == -1)
+				if (_s_connect(this->_fd, reinterpret_cast<const sockaddr *>(&addr._struct), addr._sizeof) == -1)
 					throw system_error(errno, std::generic_category(), "connect");
+				this->_addr = addr;
 			}
-
-		protected:
-			const sock_type		_type;
-			const protoent		_proto;
-			const sockfd_type	_fd;
-			addr<FAMILY>		_addr;
-
-			socket_interface(const sock_type &type, const protoent &proto, const sockfd_type &fd) \
-				: _type(type), _proto(proto), _fd(fd) {}
-			socket_interface(const sock_type &type, const protoent &proto, const sockfd_type &fd, const addr<FAMILY> &a) \
-				: _type(type), _proto(proto), _fd(fd), _addr(a) {}
-
-			virtual	~socket_interface(void) {}
-
-			template <sa_family, sock_type>
-			friend class socket;
-
-		private:
-			socket_interface(const socket_interface &src) = delete;
-			socket_interface(socket_interface &&src) = delete;
-
-			socket_interface &	operator=(const socket_interface &src) = delete;
-			socket_interface &	operator=(socket_interface &&src) = delete;
-	};
-
-	template <sa_family FAMILY, sock_type TYPE>
-	class socket : public socket_interface<FAMILY> {
-		public:
-			socket(const int &proto_id) : socket(nw::protoent(proto_id)) {}
-			socket(const std::string &proto_name) : socket(nw::protoent(proto_name)) {}
-			socket(const protoent &proto) \
-				: socket_interface<FAMILY>(TYPE, proto, _s_socket(static_cast<int32_t>(FAMILY), static_cast<int32_t>(TYPE), proto._struct->p_proto)) {
-				if (this->_fd == -1)
-					throw system_error(errno, std::generic_category(), "socket");
-			}
-
-			socket(const socket<FAMILY, TYPE> &src) \
-				: socket_interface<FAMILY>(src._type, src._proto, src._fd, src._addr) {}
-			socket(socket<FAMILY, TYPE> &&src) \
-				: socket_interface<FAMILY>(src._type, src._proto, src._fd, src._addr) {}
-
-			socket(const socket<sa_family::UNSPEC, TYPE> &src) \
-				: socket_interface<FAMILY>(src._type, src._proto, src._fd, src._addr) {}
-			socket(socket<sa_family::UNSPEC, TYPE> &&src) \
-				: socket_interface<FAMILY>(src._type, src._proto, src._fd, src._addr) {}
 
 			socket<sa_family::UNSPEC, TYPE>	accept(void) {
 				sockfd_type			fd;
@@ -120,11 +125,15 @@ namespace nw {
 				}
 			}
 
+			virtual const std::string	to_string(void) const {
+				return socket_storage<FAMILY>::to_string();
+			}
+
 			virtual	~socket(void) {}
 
 		protected:
 			socket(const protoent &proto, const sockfd_type &fd, const addr<FAMILY> &a) \
-				: socket_interface<FAMILY>(TYPE, proto, fd, a) {}
+				: socket_storage<FAMILY>(TYPE, proto, fd, a) {}
 
 			template <sa_family, sock_type>
 			friend class socket;
@@ -136,35 +145,41 @@ namespace nw {
 			socket &	operator=(socket &&src) = delete;
 	};
 
+	//! @tparam TYPE ::sock_type
 	template <sock_type TYPE>
-	class socket<sa_family::UNSPEC, TYPE> : public socket_interface<sa_family::UNSPEC> {
+	//! unspecified address socket template
+	class socket<sa_family::UNSPEC, TYPE> : protected socket_storage<sa_family::UNSPEC> {
 		public:
 			socket(const socket<sa_family::INET, TYPE> &src) \
-				: socket_interface<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {}
+				: socket_storage<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {}
 			socket(const socket<sa_family::INET6, TYPE> &src) \
-				: socket_interface<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {}
+				: socket_storage<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {}
 
 			socket(const socket &src) \
-				: socket_interface<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {}
+				: socket_storage<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {}
 			socket(socket &&src) \
-				: socket_interface<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {}
+				: socket_storage<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {}
 
+			virtual const std::string	to_string(void) const {
+				return socket_storage<sa_family::UNSPEC>::to_string();
+			}
 
 			virtual	~socket(void) {}
 
 		protected:
-
+			template <sa_family, sock_type>
+			friend class socket;
 
 		private:
 			socket &	operator=(const socket &src) = delete;
 			socket &	operator=(socket &&src) = delete;
 	};
 
+	//! @tparam TYPE ::sock_type
 	template <sock_type TYPE>
-	class socket<sa_family::INET6V4M, TYPE> {
+	//! deleted IPv6 with IPv4 mapped address socket template
+	class socket<sa_family::INET6V4M, TYPE> : protected socket_storage<sa_family::INET6V4M> {
 		public:
-			virtual	~socket(void) {}
-
 		protected:
 		private:
 			socket(const socket &src) = delete;
@@ -173,6 +188,10 @@ namespace nw {
 			socket(const int &proto_id = 0) = delete;
 			socket(const std::string &proto_name) = delete;
 			socket(const protoent &proto) = delete;
+
+			virtual	~socket(void) {}
+
+			const std::string	to_string(void) const = delete;
 
 			socket &	operator=(const socket &src) = delete;
 			socket &	operator=(socket &&src) = delete;
