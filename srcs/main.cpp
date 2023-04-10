@@ -82,12 +82,30 @@ int	main(int ac, char *av[]) try {
 //	std::cout << so << std::endl;
 //	so.listen(10);
 //	std::cout << so << std::endl;
+//	std::cout << "=====" << std::endl;
 //	nw::socket<nw::sa_family::UNSPEC, nw::sock_type::STREAM> so0 = so.accept();
 //	std::cout << so0 << std::endl;
+//	std::cout << "=====" << std::endl;
 //	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> so1 = so.accept();
 //	std::cout << so1 << std::endl;
+//	std::cout << "=====" << std::endl;
+//	nw::socket<nw::sa_family::INET6, nw::sock_type::STREAM> so2 = so.accept();
+//	std::cout << so2 << std::endl;
 
-	std::cout << SO_REUSEADDR << std::endl;
+
+//	nw::socket<nw::sa_family::UNSPEC, nw::sock_type::STREAM>	sc = std::move(so);
+//	std::cout << so << std::endl;
+//	std::cout << sc << std::endl;
+//
+//	nw::socket<nw::sa_family::INET6, nw::sock_type::STREAM>	sc0 = std::move(sc);
+//	std::cout << sc << std::endl;
+//	std::cout << sc0 << std::endl;
+
+
+
+
+
+//	std::cout << SO_REUSEADDR << std::endl;
 
 	return EXIT_SUCCESS;
 	static_cast<void>(ac);

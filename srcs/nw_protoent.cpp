@@ -19,7 +19,7 @@ static nw::protoent::type *	_protoent_dup(const nw::protoent::type *protoent_ptr
 	if (!protoent_ptr)
 		return nullptr;
 
-	size_t					aliases_count = 0;
+	size_t				aliases_count = 0;
 	nw::protoent::type	*p = new nw::protoent::type;
 
 	for (char *aliase = *protoent_ptr->p_aliases; aliase; aliase = protoent_ptr->p_aliases[aliases_count]) {

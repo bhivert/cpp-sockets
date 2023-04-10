@@ -18,7 +18,7 @@
 typedef struct protoent		protoent_struct;
 
 namespace nw {
-	template <sa_family FAMILY>
+	template <sa_family>
 	class addrinfo;
 
 	class protoent {
@@ -37,10 +37,10 @@ namespace nw {
 		protected:
 			std::shared_ptr<const type>	_struct;
 
-			template <sa_family FAMILY>
+			template <sa_family>
 			friend class addrinfo;
 
-			template <sa_family FAMILY, sock_type TYPE>
+			template <sa_family, sock_type>
 			friend class socket;
 
 		private:

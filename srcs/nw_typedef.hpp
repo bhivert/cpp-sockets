@@ -14,8 +14,8 @@
 
 # include <netdb.h>
 
-//! NetWork namespace
 namespace nw {
+	//! @enum sa_family
 	enum class	sa_family : sa_family_t {
 		UNSPEC		= AF_UNSPEC,					//!< Unspecified Internet protocols
 		INET		= AF_INET,						//!< IPv4 Internet protocols
@@ -23,6 +23,7 @@ namespace nw {
 		INET6V4M	= static_cast<sa_family_t>(~0)	//!< IPv6 with IPv4 mapped Internet protocols
 	};
 
+	//! @enum sock_type
 	enum class	sock_type : int32_t {
 		UNSPEC		= 0,				//!< Unspecified socket type
 		STREAM		= SOCK_STREAM,		//!< Provides sequenced, reliable, two-way, connection-based byte streams. An out-of-band data transmission mechanism may be supported.
