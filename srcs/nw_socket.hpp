@@ -31,7 +31,7 @@ static const std::function<int(int)>										_s_close = &close;
 namespace nw {
 	//! @tparam FAMILY nw::sa_family
 	template <sa_family FAMILY>
-	//! @brief protected socket storage class
+	//! @brief Protected socket storage class
 	class socket_storage {
 		public:
 		protected:
@@ -44,8 +44,10 @@ namespace nw {
 				: _type(src._type), _proto(src._proto), _fd(src._fd), _addr(src._addr) {
 				*const_cast<sockfd_type *>(&src._fd) = -1;
 			}
+
 			socket_storage(const sock_type &type, const protoent &proto, const sockfd_type &fd) \
 				: _type(type), _proto(proto), _fd(fd) {}
+
 			socket_storage(const sock_type &type, const protoent &proto, const sockfd_type &fd, const addr<FAMILY> &a) \
 				: _type(type), _proto(proto), _fd(fd), _addr(a) {}
 
@@ -96,7 +98,7 @@ namespace nw {
 	//! @brief socket template
 	class socket : protected socket_storage<FAMILY> {
 		public:
-			//! @brief Socket constructor form protocol number
+			//! @brief Construct form protocol number
 			//!
 			//! @throw nw::system_error if socket(2) function fail's
 			//! @throw nw::logic_error if getprotobynumber do not find protocol
@@ -104,7 +106,7 @@ namespace nw {
 				const int &proto_id	//!< protocol number required by getprotobynumber
 			) : socket(nw::protoent(proto_id)) {}
 
-			//! @brief Socket constructor from protocol name
+			//! @brief Construct from protocol name
 			//!
 			//! @throw nw::system_error if socket(2) function fail's
 			//! @throw nw::logic_error if getprotobyname do not find protocol
@@ -112,7 +114,7 @@ namespace nw {
 				const std::string &proto_name	//!< protocol name required by getprotobyname
 			) : socket(nw::protoent(proto_name)) {}
 
-			//! @brief Socket constructor form protoent class
+			//! @brief Construct form protoent class
 			//!
 			//! @throw nw::system_error if socket(2) function fail's
 			socket(
@@ -122,12 +124,12 @@ namespace nw {
 					throw system_error(errno, std::generic_category(), "socket");
 			}
 
-			//! @brief Socket move constructor
+			//! @brief Move constructor
 			socket(
 				socket<FAMILY, TYPE> &&src	//!< nw::socket
 			) : socket_storage<FAMILY>(std::move(src)) {}
 
-			//! @brief Unspecified socket move constructor
+			//! @brief Unspecified address family socket move constructor
 			socket(
 				socket<sa_family::UNSPEC, TYPE> &&src	//!< nw::sa_family::UNSPEC specialized nw::socket
 			) : socket_storage<FAMILY>(src._type, src._proto, src._fd, src._addr) {
@@ -215,7 +217,7 @@ namespace nw {
 				return socket_storage<FAMILY>::to_string();
 			}
 
-			//! Socket destructor
+			//! Destructor
 			//! @details
 			//! If socket is valid close it with no throw behavior
 			virtual	~socket(void) {
@@ -243,21 +245,21 @@ namespace nw {
 	//! @details Socket placeholder for nw::sa_family::INET and nw::sa_family::INET6 address family
 	class socket<sa_family::UNSPEC, TYPE> : protected socket_storage<sa_family::UNSPEC> {
 		public:
-			//! @brief IPv4 socket move constructor
+			//! @brief Move construct from IPv4 socket
 			socket(
 				socket<sa_family::INET, TYPE> &&src	//!< nw::sa_family::INET nw::socket
 			) : socket_storage<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {
 				*const_cast<sockfd_type *>(&src._fd) = -1;
 			}
 
-			//! @brief IPv6 socket move constructor
+			//! @brief Move construct from IPv6 socket
 			socket(
 				socket<sa_family::INET6, TYPE> &&src	//!< nw::sa_family::INET6 nw::socket
 			) : socket_storage<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {
 				*const_cast<sockfd_type *>(&src._fd) = -1;
 			}
 
-			//! @brief Unspecified socket move constructor
+			//! @brief Move construct from unspecified address family socket
 			socket(
 				socket &&src	//!< nw::sa_family::UNSPEC specialized nw::socket
 			) : socket_storage<sa_family::UNSPEC>(std::move(src)) {}
@@ -266,7 +268,7 @@ namespace nw {
 				return socket_storage<sa_family::UNSPEC>::to_string();
 			}
 
-			//! @brief Unspecified socket destructor
+			//! @brief Destructor
 			//! @details
 			//! If socket is valid close it with no throw behavior
 			virtual	~socket(void) {
@@ -287,7 +289,7 @@ namespace nw {
 
 	//! @tparam TYPE nw::sock_type
 	template <sock_type TYPE>
-	//! Deleted IPv6 with IPv4 mapped address socket template
+	//! Deleted IPv6 with IPv4 mapped address socket template specialization
 	class socket<sa_family::INET6V4M, TYPE> : protected socket_storage<sa_family::INET6V4M> {
 		public:
 		protected:

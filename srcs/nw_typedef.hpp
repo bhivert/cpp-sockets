@@ -17,10 +17,10 @@
 namespace nw {
 	//! @enum sa_family
 	enum class	sa_family : sa_family_t {
-		UNSPEC		= AF_UNSPEC,					//!< Unspecified Internet protocols
-		INET		= AF_INET,						//!< IPv4 Internet protocols
-		INET6		= AF_INET6,						//!< IPv6 Internet protocols
-		INET6V4M	= static_cast<sa_family_t>(~0)	//!< IPv6 with IPv4 mapped Internet protocols
+		UNSPEC		= AF_UNSPEC,					//!< Unspecified Internet family
+		INET		= AF_INET,						//!< IPv4 Internet family
+		INET6		= AF_INET6,						//!< IPv6 Internet family
+		INET6V4M	= static_cast<sa_family_t>(~0)	//!< IPv6 with IPv4 mapped Internet family
 	};
 
 	//! @enum sock_type
