@@ -135,7 +135,7 @@ namespace nw {
 				return *this;
 			}
 
-			//! @brief return a json formated std::string containing addr data
+			//! @brief Return a json formated std::string containing addr data
 			//! @return json formated std::string
 			const std::string	to_string(void) const {
 				std::string	str;
@@ -238,7 +238,7 @@ namespace nw {
 				return *this;
 			}
 
-			//! @brief return a json formated std::string containing addr data
+			//! @brief Return a json formated std::string containing addr data
 			//! @return json formated std::string
 			const std::string	to_string(void) const {
 				std::string	str;
@@ -315,7 +315,7 @@ namespace nw {
 				return *this;
 			}
 
-			//! @brief return a json formated std::string containing addr data
+			//! @brief Return a json formated std::string containing addr data
 			//! @return json formated std::string
 			const std::string	to_string(void) const {
 				return addr<sa_family::INET6>::to_string();

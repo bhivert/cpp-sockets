@@ -38,7 +38,7 @@ namespace nw {
 	typedef int32_t		proto_id;
 	typedef int32_t		sockfd_type;
 
-	typedef size_t		size_type;
+	typedef ssize_t		size_type;
 	typedef size_type	pos_type;
 
 	typedef std::exception		exception;

@@ -18,17 +18,10 @@
 #include "nw_socket.hpp"
 
 int	main(int ac, char *av[]) try {
-	//socket
 	//close
 
-	//bind
-	//listen
-	//connect
-
-	//sendmsg
 	//recvmsg
 
-	//send
 	//recv
 
 	//writev

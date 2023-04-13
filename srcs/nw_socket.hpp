@@ -26,7 +26,7 @@ static const std::function<int(int)>										_s_close = &close;
 # include "nw_addr.hpp"
 //# include "nw_addrinfo.hpp"
 //# include "nw_sockopt.hpp"
-//# include "nw_buffer.hpp"
+# include "nw_buffer.hpp"
 
 namespace nw {
 	//! @tparam FAMILY nw::sa_family
@@ -136,6 +136,13 @@ namespace nw {
 				*const_cast<sockfd_type *>(&src._fd) = -1;
 			}
 
+			//! Destructor
+			//! @details
+			//! If socket is valid close it with no throw behavior
+			virtual	~socket(void) {
+				this->close(std::nothrow);
+			}
+
 			//! @brief Marks the socket as a passive socket, that is, as a socket that will be used to accept incoming connection requests using nw::socket::accept.
 			//!
 			//! @throw nw::system_error if listen(2) function fail's
@@ -211,18 +218,30 @@ namespace nw {
 				socket_storage<FAMILY>::close(std::nothrow);
 			}
 
-			//! @brief return a json formated std::string containing socket data
+			//! @brief Return a json formated std::string containing socket data
 			//! @return json formated std::string
 			const std::string	to_string(void) const {
 				return socket_storage<FAMILY>::to_string();
 			}
 
-			//! Destructor
-			//! @details
-			//! If socket is valid close it with no throw behavior
-			virtual	~socket(void) {
-				this->close(std::nothrow);
+			template <nw::size_type SIZE>
+			void		send(nw::buffer<SIZE> &buf, int flags) {
+				static_cast<void>(buf);
+				static_cast<void>(flags);
 			}
+
+			template <nw::size_type SIZE>
+			void		send(nw::buffer<SIZE> &buf, int flags, nw::addr<FAMILY> &addr) {
+				static_cast<void>(buf);
+				static_cast<void>(flags);
+				static_cast<void>(addr);
+			}
+
+			nw::size_type	send(struct msghdr msg, int flags) {
+				static_cast<void>(msg);
+				static_cast<void>(flags);
+			}
+
 
 		protected:
 			socket(const protoent &proto, const sockfd_type &fd, const addr<FAMILY> &a) \
@@ -264,6 +283,8 @@ namespace nw {
 				socket &&src	//!< nw::sa_family::UNSPEC specialized nw::socket
 			) : socket_storage<sa_family::UNSPEC>(std::move(src)) {}
 
+			//! @brief return a json formated std::string containing socket data
+			//! @return json formated std::string
 			virtual const std::string	to_string(void) const {
 				return socket_storage<sa_family::UNSPEC>::to_string();
 			}
