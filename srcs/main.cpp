@@ -3,9 +3,10 @@
 #include <iostream>
 
 //#include "nw_addr.hpp"
-#include "nw_addrinfo.hpp"
+//#include "nw_addrinfo.hpp"
 //#include "nw_protoent.hpp"
-//#include "nw_buffer.hpp"
+#include "buffer/nw_ibuffer.hpp"
+#include "buffer/nw_obuffer.hpp"
 
 //#include <unistd.h>
 //#include <sys/types.h>
@@ -15,12 +16,13 @@
 //
 //#include <sys/socket.h>
 
-#include "nw_socket.hpp"
+//#include "nw_socket.hpp"
 
 int	main(int ac, char *av[]) try {
 	//close
 
 	//recvmsg
+	//sendto
 
 	//recv
 
@@ -63,9 +65,12 @@ int	main(int ac, char *av[]) try {
 //
 //	b.clear();
 
-	std::cout << nw::addrinfo<nw::sa_family::INET>("80", "google.fr", "tcp") << std::endl;
-	std::cout << nw::addrinfo<nw::sa_family::INET6V4M>("80", "google.fr", "tcp") << std::endl;
-	std::cout << nw::addrinfo<nw::sa_family::UNSPEC>("80", "google.fr", 0, nw::sock_type::UNSPEC) << std::endl;
+	nw::ibuffer<38> i;
+	nw::obuffer<38> o;
+
+//	std::cout << nw::addrinfo<nw::sa_family::INET>("80", "google.fr", "tcp") << std::endl;
+//	std::cout << nw::addrinfo<nw::sa_family::INET6V4M>("80", "google.fr", "tcp") << std::endl;
+//	std::cout << nw::addrinfo<nw::sa_family::UNSPEC>("80", "google.fr", 0, nw::sock_type::UNSPEC) << std::endl;
 
 //	nw::socket<nw::sa_family::INET>({"80", "192.168.1.9", "tcp"});
 

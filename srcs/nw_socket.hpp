@@ -26,7 +26,7 @@ static const std::function<int(int)>										_s_close = &close;
 # include "nw_addr.hpp"
 //# include "nw_addrinfo.hpp"
 //# include "nw_sockopt.hpp"
-# include "nw_buffer.hpp"
+# include "buffer/nw_buffer.hpp"
 
 namespace nw {
 	//! @tparam FAMILY nw::sa_family
