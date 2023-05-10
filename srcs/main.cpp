@@ -66,7 +66,12 @@ int	main(int ac, char *av[]) try {
 //	b.clear();
 
 	nw::ibuffer<38> i;
+
+	i.putn("Hello world !", 13);
+	std::cout << i << std::endl;
+
 	nw::obuffer<38> o;
+	std::cout << (o << 0xFFFFFF00) << std::endl;
 
 //	std::cout << nw::addrinfo<nw::sa_family::INET>("80", "google.fr", "tcp") << std::endl;
 //	std::cout << nw::addrinfo<nw::sa_family::INET6V4M>("80", "google.fr", "tcp") << std::endl;

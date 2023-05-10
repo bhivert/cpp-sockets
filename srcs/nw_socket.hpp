@@ -26,7 +26,9 @@ static const std::function<int(int)>										_s_close = &close;
 # include "nw_addr.hpp"
 //# include "nw_addrinfo.hpp"
 //# include "nw_sockopt.hpp"
-# include "buffer/nw_buffer.hpp"
+
+# include "buffer/nw_ibuffer.hpp"
+# include "buffer/nw_obuffer.hpp"
 
 namespace nw {
 	//! @tparam FAMILY nw::sa_family
@@ -225,13 +227,13 @@ namespace nw {
 			}
 
 			template <nw::size_type SIZE>
-			void		send(nw::buffer<SIZE> &buf, int flags) {
+			void		send(nw::obuffer<SIZE> &buf, int flags) {
 				static_cast<void>(buf);
 				static_cast<void>(flags);
 			}
 
 			template <nw::size_type SIZE>
-			void		send(nw::buffer<SIZE> &buf, int flags, nw::addr<FAMILY> &addr) {
+			void		send(nw::obuffer<SIZE> &buf, int flags, const nw::addr<FAMILY> &addr) {
 				static_cast<void>(buf);
 				static_cast<void>(flags);
 				static_cast<void>(addr);
@@ -242,6 +244,23 @@ namespace nw {
 				static_cast<void>(flags);
 			}
 
+			template <nw::size_type SIZE>
+			void		recv(nw::ibuffer<SIZE> &buf, int flags) {
+				static_cast<void>(buf);
+				static_cast<void>(flags);
+			}
+
+			template <nw::size_type SIZE>
+			void		recv(nw::ibuffer<SIZE> &buf, int flags, const nw::addr<FAMILY> &addr) {
+				static_cast<void>(buf);
+				static_cast<void>(flags);
+				static_cast<void>(addr);
+			}
+
+			nw::size_type	recv(struct msghdr msg, int flags) {
+				static_cast<void>(msg);
+				static_cast<void>(flags);
+			}
 
 		protected:
 			socket(const protoent &proto, const sockfd_type &fd, const addr<FAMILY> &a) \

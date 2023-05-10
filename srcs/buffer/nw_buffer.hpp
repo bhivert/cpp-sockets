@@ -37,7 +37,7 @@ namespace nw {
 				str += "\"full\" : " + std::string((this->is_full()) ? "true" : "false") + ", ";
 				str += "\"data\" : [ ";
 				for (nw::size_type i = 0; i != this->size(); ++i) {
-					str += std::to_string(this->_buf[i]);
+					str += std::to_string(static_cast<uint8_t>(this->_buf[i]));
 					if (i + 1 != this->size())
 						str += ", ";
 				}

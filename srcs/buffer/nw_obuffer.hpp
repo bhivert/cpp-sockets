@@ -18,8 +18,6 @@ namespace nw {
 			obuffer(void) : buffer<SIZE>() {};
 			virtual	~obuffer(void) {};
 
-			const std::string	to_string(void) const;
-
 			virtual int	sync(const typename nw::buffer<SIZE>::sync_fct_t fct) {
 				if (this->is_empty())
 					return 0;
@@ -36,6 +34,14 @@ namespace nw {
 				return 0;
 			}
 
+			template <typename T>
+			obuffer	&	operator<<(const T &t) {
+				if (this->size() - this->in_avail() < sizeof(T))
+					throw logic_error(std::string("obuffer : not enouth place in buffer for ") + typeid(T).name() + " type");
+				this->putn(&t, sizeof(T));
+				return *this;
+			}
+
 		protected:
 		private:
 			obuffer(const obuffer &src) = delete;
@@ -48,6 +54,8 @@ namespace nw {
 
 template <nw::size_type SIZE>
 std::ostream &	operator<<(std::ostream &o, const nw::obuffer<SIZE> &C) {
+	o << C.to_string();
+	return o;
 }
 
 #endif

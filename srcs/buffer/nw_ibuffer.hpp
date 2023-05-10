@@ -34,6 +34,14 @@ namespace nw {
 				return 0;
 			}
 
+			template <typename T>
+			ibuffer	&	operator>>(T &t) {
+				if (this->in_avail() < sizeof(T))
+					throw logic_error(std::string("ibuffer : not enouth data in buffer for ") + typeid(T).name() + " type");
+				this->getn(&t, sizeof(T));
+				return *this;
+			}
+
 		protected:
 		private:
 			ibuffer(const ibuffer &src) = delete;
@@ -46,6 +54,8 @@ namespace nw {
 
 template <nw::size_type SIZE>
 std::ostream &	operator<<(std::ostream &o, const nw::ibuffer<SIZE> &C) {
+	o << C.to_string();
+	return o;
 }
 
 #endif
