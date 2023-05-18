@@ -146,8 +146,8 @@ namespace nw {
 				uint8_t				: 6;
 			}				_stats;
 			struct	{
-				size_type	get;
-				size_type	put;
+				pos_type	get;
+				pos_type	put;
 			}				_off;
 
 		private:

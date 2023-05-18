@@ -16,23 +16,14 @@
 //
 //#include <sys/socket.h>
 
-//#include "nw_socket.hpp"
+#include "nw_socket.hpp"
 
 int	main(int ac, char *av[]) try {
 	//close
 
-	//recvmsg
-	//sendto
-
-	//recv
-
-	//writev
-	//readv
-
-	//write
-	//read
-
 	//setsockopt
+
+	//recvfrom
 
 //	int fd = socket(AF_INET, SOCK_STREAM, 6);
 //
@@ -65,30 +56,37 @@ int	main(int ac, char *av[]) try {
 //
 //	b.clear();
 
-	nw::ibuffer<38> i;
+//	nw::ibuffer<38> i;
 
-	i.putn("Hello world !", 13);
-	std::cout << i << std::endl;
+//	i.putn("Hello world !", 13);
+//	std::cout << i << std::endl;
 
 	nw::obuffer<38> o;
-	std::cout << (o << 0xFFFFFF00) << std::endl;
+//	std::cout << (o << 0xFFFFFF00) << std::endl;
 
 //	std::cout << nw::addrinfo<nw::sa_family::INET>("80", "google.fr", "tcp") << std::endl;
 //	std::cout << nw::addrinfo<nw::sa_family::INET6V4M>("80", "google.fr", "tcp") << std::endl;
 //	std::cout << nw::addrinfo<nw::sa_family::UNSPEC>("80", "google.fr", 0, nw::sock_type::UNSPEC) << std::endl;
 
-//	nw::socket<nw::sa_family::INET>({"80", "192.168.1.9", "tcp"});
+//	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> c("tcp");
+//	c.connect({80, "127.0.0.1"});
 
-//	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM>	so("tcp");
-//	std::cout << so << std::endl;
-//	so.bind(80);
-//	std::cout << so << std::endl;
-//	so.listen(10);
-//	std::cout << so << std::endl;
-//	std::cout << "=====" << std::endl;
-//	nw::socket<nw::sa_family::UNSPEC, nw::sock_type::STREAM> so0 = so.accept();
-//	std::cout << so0 << std::endl;
-//	std::cout << "=====" << std::endl;
+//	o << "Hello world !" << '\n';
+//	std::cout << o << std::endl;
+//	c.send(o);
+//	std::cout << o << std::endl;
+
+
+	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM>	so("tcp");
+	std::cout << so << std::endl;
+	so.bind(80);
+	std::cout << so << std::endl;
+	so.listen(10);
+	std::cout << so << std::endl;
+	std::cout << "=====" << std::endl;
+	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> so0 = so.accept();
+	std::cout << so0 << std::endl;
+	std::cout << "=====" << std::endl;
 //	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> so1 = so.accept();
 //	std::cout << so1 << std::endl;
 //	std::cout << "=====" << std::endl;

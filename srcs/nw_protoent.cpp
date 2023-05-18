@@ -6,11 +6,12 @@
 
 #include <cstring>
 
+#include "nw_typedef.hpp"
 #include "nw_protoent.hpp"
 
 static char	*_str_dup(const char *s) {
-	size_t	len = std::strlen(s);
-	char	*n = new char [len + 1];
+	nw::size_type	len = std::strlen(s);
+	char		*n = new char [len + 1];
 	std::strcpy(n, s);
 	return n;
 }
@@ -19,7 +20,7 @@ static nw::protoent::type *	_protoent_dup(const nw::protoent::type *protoent_ptr
 	if (!protoent_ptr)
 		return nullptr;
 
-	size_t				aliases_count = 0;
+	nw::size_type			aliases_count = 0;
 	nw::protoent::type	*p = new nw::protoent::type;
 
 	for (char *aliase = *protoent_ptr->p_aliases; aliase; aliase = protoent_ptr->p_aliases[aliases_count]) {
@@ -27,7 +28,7 @@ static nw::protoent::type *	_protoent_dup(const nw::protoent::type *protoent_ptr
 	}
 	p->p_name = _str_dup(protoent_ptr->p_name);
 	p->p_aliases = new char *[aliases_count + 1];
-	for (size_t i = 0; i != aliases_count; ++i) {
+	for (nw::size_type i = 0; i != aliases_count; ++i) {
 		p->p_aliases[i] = _str_dup(protoent_ptr->p_aliases[i]);
 	}
 	p->p_aliases[aliases_count] = nullptr;
@@ -41,7 +42,7 @@ static void					_protoent_delete(nw::protoent::type *protoent_ptr) {
 	delete [] protoent_ptr->p_name;
 
 	char *alias = *protoent_ptr->p_aliases;
-	for (size_t i = 0; alias; alias = protoent_ptr->p_aliases[++i]) {
+	for (nw::size_type i = 0; alias; alias = protoent_ptr->p_aliases[++i]) {
 		delete [] alias;
 	}
 	delete [] protoent_ptr->p_aliases;
@@ -74,7 +75,7 @@ const std::string			nw::protoent::to_string(void) const {
 	str += "\"aliases\": [ ";
 
 	char *alias = *this->_struct->p_aliases;
-	for (size_t i = 0; alias; alias = this->_struct->p_aliases[++i]) {
+	for (size_type i = 0; alias; alias = this->_struct->p_aliases[++i]) {
 		str += "\"" + std::string(alias) + "\"";
 		if (this->_struct->p_aliases[i + 1])
 			str += ", ";

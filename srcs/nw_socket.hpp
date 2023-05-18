@@ -20,6 +20,14 @@ static const std::function<int(int, int)>									_s_listen = &listen;
 static const std::function<int(int, const struct sockaddr *, socklen_t)>	_s_connect = &connect;
 static const std::function<int(int, struct sockaddr *, socklen_t *)>		_s_accept = &accept;
 static const std::function<int(int)>										_s_close = &close;
+static const std::function<ssize_t(int, void *, size_t, int)>				_s_send = &send;
+static const std::function<ssize_t(int, void *, size_t, int, \
+		const struct sockaddr *dest_addr, socklen_t addrlen)>				_s_sendto = &sendto;
+static const std::function<ssize_t(int, const struct msghdr *, int)>		_s_sendmsg = &sendmsg;
+static const std::function<ssize_t(int, void *, size_t, int)>				_s_recv = &recv;
+static const std::function<ssize_t(int, void *, size_t, int, \
+		struct sockaddr *dest_addr, socklen_t *addrlen)>					_s_recvfrom = &recvfrom;
+static const std::function<ssize_t(int, struct msghdr *, int)>				_s_recvmsg = &recvmsg;
 
 # include "nw_typedef.hpp"
 # include "nw_protoent.hpp"
@@ -192,21 +200,14 @@ namespace nw {
 			//! @return nw::sa_family::UNSPEC specialized nw::socket
 			//! @throw nw::system_error if accept(2) function fail's
 			//! @throw nw::logic_error if connected socket come from unsupported address family
-			socket<sa_family::UNSPEC, TYPE> accept(void) {
-				sockfd_type			fd;
-				addr_storage::type	addr_struct;
-				socklen_type		addr_len	= sizeof(addr_struct);
+			socket<FAMILY, TYPE> accept(void) {
+				sockfd_type					fd;
+				typename addr<FAMILY>::type	addr_struct;
+				socklen_type				addr_len	= sizeof(addr_struct);
 
 				if ((fd = _s_accept(this->_fd, reinterpret_cast<struct sockaddr *>(&addr_struct), &addr_len)) == -1)
 					throw system_error(errno, std::generic_category(), "accept");
-				switch (static_cast<sa_family>(addr_struct.ss_family)) {
-					case sa_family::INET:
-						return socket<sa_family::INET, TYPE>(this->_proto, fd, *reinterpret_cast<addr<sa_family::INET>::type *>(&addr_struct));
-					case sa_family::INET6:
-						return socket<sa_family::INET6, TYPE>(this->_proto, fd, *reinterpret_cast<addr<sa_family::INET6>::type *>(&addr_struct));
-					default:
-						throw logic_error("accept: invalid address family");
-				}
+				return socket<FAMILY, TYPE>(this->_proto, fd, *reinterpret_cast<typename addr<FAMILY>::type *>(&addr_struct));
 			}
 
 			//! @brief Close the socket.
@@ -226,40 +227,54 @@ namespace nw {
 				return socket_storage<FAMILY>::to_string();
 			}
 
-			template <nw::size_type SIZE>
-			void		send(nw::obuffer<SIZE> &buf, int flags) {
-				static_cast<void>(buf);
-				static_cast<void>(flags);
+			template <size_type SIZE>
+			void	send(obuffer<SIZE> &buf, int flags = 0) {
+				const sockfd_type	fd = this->_fd;
+
+				buf.sync([fd, flags](void *buf, size_type size){
+						return _s_send(fd, buf, size, flags);
+					});
 			}
 
-			template <nw::size_type SIZE>
-			void		send(nw::obuffer<SIZE> &buf, int flags, const nw::addr<FAMILY> &addr) {
-				static_cast<void>(buf);
-				static_cast<void>(flags);
-				static_cast<void>(addr);
+			template <size_type SIZE>
+			void	send(obuffer<SIZE> &buf, const addr<FAMILY> &addr, int flags = 0) {
+				const sockfd_type	fd = this->_fd;
+
+				buf.sync([fd, flags, &addr](void *buf, size_type size){
+						return _s_sendto(fd, buf, size, flags, &addr._struct, sizeof(nw::addr<FAMILY>::type));
+					});
 			}
 
-			nw::size_type	send(struct msghdr msg, int flags) {
+			void	send(struct msghdr msg, int flags) {
 				static_cast<void>(msg);
 				static_cast<void>(flags);
+				//sendmsg
 			}
 
-			template <nw::size_type SIZE>
-			void		recv(nw::ibuffer<SIZE> &buf, int flags) {
-				static_cast<void>(buf);
-				static_cast<void>(flags);
+			template <size_type SIZE>
+			void	recv(ibuffer<SIZE> &buf, int flags = 0) {
+				const sockfd_type	fd = this->_fd;
+
+				buf.sync([fd, flags](void *buf, size_type size){
+						return _s_recv(fd, buf, size, flags);
+					});
 			}
 
-			template <nw::size_type SIZE>
-			void		recv(nw::ibuffer<SIZE> &buf, int flags, const nw::addr<FAMILY> &addr) {
-				static_cast<void>(buf);
-				static_cast<void>(flags);
-				static_cast<void>(addr);
+			template <size_type SIZE>
+			void	recv(ibuffer<SIZE> &buf, const addr<FAMILY> &addr, int flags = 0) {
+				typename nw::addr<FAMILY>::type	sa;
+				socklen_type					sa_len = sizeof(nw::addr<FAMILY>::type);
+
+				buf.sync([this, flags, &sa, &sa_len](void *buf, size_type size){
+						return _s_recvfrom(this->_fd, buf, size, flags, &sa, &sa_len);
+					});
+				addr = nw::addr<FAMILY>(sa);
 			}
 
-			nw::size_type	recv(struct msghdr msg, int flags) {
+			void	recv(struct msghdr msg, int flags) {
 				static_cast<void>(msg);
 				static_cast<void>(flags);
+				//recvmsg
 			}
 
 		protected:
