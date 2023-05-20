@@ -18,20 +18,18 @@ namespace nw {
 			obuffer(void) : buffer<SIZE>() {};
 			virtual	~obuffer(void) {};
 
-			virtual int	sync(const typename nw::buffer<SIZE>::sync_fct_t fct) {
+			virtual size_type	sync(const typename nw::buffer<SIZE>::sync_fct_t fct) {
 				if (this->is_empty())
 					return 0;
 				ssize_t ret = fct(&this->_buf[this->_off.get], (this->_off.get < this->_off.put) ? this->_off.put - this->_off.get : this->size() - this->_off.get);
-				if (!ret) {
-					this->_stats.eof = true;
+				if (!ret)
 					return 0;
-				}
 				if (!(ret > 0))
-					return -1;
+					return nw::npos;
 				this->_off.get = (this->_off.get + ret) % this->size();
 				if (this->_off.get == this->_off.put)
 					this->_off = {0, 0};
-				return 0;
+				return ret;
 			}
 
 			template <typename T>

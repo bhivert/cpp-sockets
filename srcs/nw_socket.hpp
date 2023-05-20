@@ -80,6 +80,7 @@ namespace nw {
 				std::string	str;
 
 				str = "{ \"family\": \"" + sa_family_str(FAMILY) + "\", ";
+				str += "\"fd\": \"" + std::to_string(this->_fd) + "\", ";
 				str += "\"type\": \"" + sock_type_str(this->_type) + "\", ";
 				str += "\"protocol\": " + this->_proto.to_string() + ", ";
 				str += "\"address\": " + this->_addr.to_string() + "}";
@@ -182,6 +183,8 @@ namespace nw {
 			//!
 			//! If the socket's type is nw::sock_type::STREAM or nw::sock_type::SEQPACKET, this call attempts to make a connection to the socket that is bound to the address specified by addr.
 			//!
+			//! Generally, connection-based protocol sockets may successfully connect() only once; connectionless protocol sockets may use connect() multiple times to change their association.
+			//!
 			//! @throw nw::system_error if connect(2) function fail's
 			void	connect(
 				const addr<FAMILY> &addr	//!< nw::addr
@@ -189,6 +192,32 @@ namespace nw {
 				if (_s_connect(this->_fd, reinterpret_cast<const sockaddr *>(&addr._struct), addr._sizeof) == -1)
 					throw system_error(errno, std::generic_category(), "connect");
 				this->_addr = addr;
+			}
+
+			//! @brief Connects the socket to the address specified by addr.
+			//! @details
+			//! Call to nw::socket<FAMILY, TYPE>::connect(const addr<FAMILY> &addr)
+			//!
+			//! @throw nw::system_error if connect(2) function fail's
+			socket<FAMILY, TYPE> &	operator<<(
+				const addr<FAMILY> &addr	//!< nw::addr
+			) {
+				this->connect(addr);
+				return *this;
+			}
+
+			//! @briefon Dissolve the association with address
+			//! @details
+			//!
+			//! @throw nw::system_error if connect(2) function fail's
+			void	connect(
+				const addr<sa_family::UNSPEC>	//!< nw::addr
+			) {
+				nw::addr<sa_family::UNSPEC>::type	ss = {AF_UNSPEC, {0}, 0};
+
+				if (_s_connect(this->_fd, reinterpret_cast<const sockaddr *>(&ss), sizeof(ss)) == -1)
+					throw system_error(errno, std::generic_category(), "connect");
+				this->_addr = nw::addr<FAMILY>();
 			}
 
 			//! @brief Accept incoming connection from connection-based socket types (nw::sock_type::STREAM, nw::sock_type::SEQPACKET).
@@ -227,51 +256,113 @@ namespace nw {
 				return socket_storage<FAMILY>::to_string();
 			}
 
+			//! @tparam TYPE nw::size_type
 			template <size_type SIZE>
-			void	send(obuffer<SIZE> &buf, int flags = 0) {
+			//! @brief Transmit a message to another socket.
+			//! @details
+			//! The send() call may be used only with an connected socket.
+			//!
+			//! @throw nw::system_error if send(2) function fail's
+			size_type	send(
+				obuffer<SIZE> &buf,	//!< nw::obuffer<SIZE>
+				int flags = 0
+			) {
 				const sockfd_type	fd = this->_fd;
 
-				buf.sync([fd, flags](void *buf, size_type size){
-						return _s_send(fd, buf, size, flags);
-					});
+				return buf.sync([fd, flags](void *buf, size_type size){
+					ssize_t	ret = _s_send(fd, buf, size, flags);
+					if (ret == -1)
+						throw system_error(errno, std::generic_category(), "send");
+					return ret;
+				});
 			}
 
+			//! @tparam TYPE nw::size_type
 			template <size_type SIZE>
-			void	send(obuffer<SIZE> &buf, const addr<FAMILY> &addr, int flags = 0) {
+			//! @brief Transmit a message to another socket.
+			//! @details
+			//! Call to nw::socket<FAMILY, TYPE>::send(obuffer<SIZE> &buf, int flags = 0)
+			//!
+			//! @throw nw::system_error if send(2) function fail's
+			socket<FAMILY, TYPE> &	operator<<(
+				obuffer<SIZE> &buf	//!< nw::obuffer
+			) {
+				this->send(buf);
+				return *this;
+			}
+
+			//! @tparam TYPE nw::size_type
+			template <size_type SIZE>
+			size_type	send(
+				obuffer<SIZE> &buf,
+				const addr<FAMILY> &addr,
+				int flags = 0
+			) {
 				const sockfd_type	fd = this->_fd;
 
-				buf.sync([fd, flags, &addr](void *buf, size_type size){
-						return _s_sendto(fd, buf, size, flags, &addr._struct, sizeof(nw::addr<FAMILY>::type));
-					});
+				return buf.sync([fd, flags, &addr](void *buf, size_type size){
+					size_t	ret = _s_sendto(fd, buf, size, flags, &addr._struct, sizeof(nw::addr<FAMILY>::type));
+					if (ret == -1)
+						throw system_error(errno, std::generic_category(), "sendto");
+					return ret;
+				});
 			}
 
-			void	send(struct msghdr msg, int flags) {
+			size_type	send(
+				struct msghdr msg,
+				int flags
+			) {
 				static_cast<void>(msg);
 				static_cast<void>(flags);
 				//sendmsg
 			}
 
 			template <size_type SIZE>
-			void	recv(ibuffer<SIZE> &buf, int flags = 0) {
+			size_type	recv(
+				ibuffer<SIZE> &buf,
+				int flags = 0
+			) {
 				const sockfd_type	fd = this->_fd;
 
-				buf.sync([fd, flags](void *buf, size_type size){
-						return _s_recv(fd, buf, size, flags);
-					});
+				return buf.sync([fd, flags](void *buf, size_type size){
+					ssize_t	ret = _s_recv(fd, buf, size, flags);
+					if (ret == -1)
+						throw system_error(errno, std::generic_category(), "recv");
+					return ret;
+				});
 			}
 
 			template <size_type SIZE>
-			void	recv(ibuffer<SIZE> &buf, const addr<FAMILY> &addr, int flags = 0) {
+			socket<FAMILY, TYPE> &	operator>>(
+				ibuffer<SIZE> &buf
+			) {
+				this->recv(buf);
+				return *this;
+			}
+
+			template <size_type SIZE>
+			size_type	recv(
+				ibuffer<SIZE> &buf,
+				const addr<FAMILY> &addr,
+				int flags = 0
+			) {
 				typename nw::addr<FAMILY>::type	sa;
 				socklen_type					sa_len = sizeof(nw::addr<FAMILY>::type);
 
-				buf.sync([this, flags, &sa, &sa_len](void *buf, size_type size){
-						return _s_recvfrom(this->_fd, buf, size, flags, &sa, &sa_len);
-					});
+				size_type ret = buf.sync([this, flags, &sa, &sa_len](void *buf, size_type size){
+					ssize_t	ret = _s_recvfrom(this->_fd, buf, size, flags, &sa, &sa_len);
+					if (ret == -1)
+						throw system_error(errno, std::generic_category(), "recvfrom");
+					return ret;
+				});
 				addr = nw::addr<FAMILY>(sa);
+				return ret;
 			}
 
-			void	recv(struct msghdr msg, int flags) {
+			size_type recv(
+				struct msghdr msg,
+				int flags
+			) {
 				static_cast<void>(msg);
 				static_cast<void>(flags);
 				//recvmsg

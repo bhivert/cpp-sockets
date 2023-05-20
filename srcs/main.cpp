@@ -23,6 +23,7 @@ int	main(int ac, char *av[]) try {
 
 	//setsockopt
 
+	//sendto
 	//recvfrom
 
 //	int fd = socket(AF_INET, SOCK_STREAM, 6);
@@ -68,25 +69,36 @@ int	main(int ac, char *av[]) try {
 //	std::cout << nw::addrinfo<nw::sa_family::INET6V4M>("80", "google.fr", "tcp") << std::endl;
 //	std::cout << nw::addrinfo<nw::sa_family::UNSPEC>("80", "google.fr", 0, nw::sock_type::UNSPEC) << std::endl;
 
-//	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> c("tcp");
-//	c.connect({80, "127.0.0.1"});
+	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> c("tcp");
+	c.connect({80, "127.0.0.1"});
 
-//	o << "Hello world !" << '\n';
-//	std::cout << o << std::endl;
-//	c.send(o);
-//	std::cout << o << std::endl;
-
-
-	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM>	so("tcp");
-	std::cout << so << std::endl;
-	so.bind(80);
-	std::cout << so << std::endl;
-	so.listen(10);
-	std::cout << so << std::endl;
+	o << "Hello world !" << '\n';
+	std::cout << o << std::endl;
+	std::cout << c << std::endl;
 	std::cout << "=====" << std::endl;
-	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> so0 = so.accept();
-	std::cout << so0 << std::endl;
+	c.send(o);
+	std::cout << c << std::endl;
 	std::cout << "=====" << std::endl;
+	c.close();
+	std::cout << c << std::endl;
+	std::cout << "=====" << std::endl;
+	while(1) {}
+
+
+//	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM>	so("tcp");
+//	std::cout << so << std::endl;
+//	so.bind(80);
+//	std::cout << so << std::endl;
+//	so.listen(10);
+//	std::cout << so << std::endl;
+//	std::cout << "=====" << std::endl;
+//	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> so0 = so.accept();
+//	std::cout << so0 << std::endl;
+//	std::cout << "=====" << std::endl;
+//	so0.send(o);
+//	so0.close();
+//	std::cout << so0 << std::endl;
+//	std::cout << "=====" << std::endl;
 //	nw::socket<nw::sa_family::INET, nw::sock_type::STREAM> so1 = so.accept();
 //	std::cout << so1 << std::endl;
 //	std::cout << "=====" << std::endl;

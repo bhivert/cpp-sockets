@@ -22,7 +22,7 @@ namespace nw {
 
 			buffer(void)\
 				: _buf{0}, \
-				_stats{false, false}, \
+				_is_full(false), \
 				_off{0, 0} {
 			}
 
@@ -51,11 +51,11 @@ namespace nw {
 			}
 
 			inline bool		is_full(void) const {
-				return this->_stats.is_full;
+				return this->_is_full;
 			}
 
 			inline bool		is_empty(void) const {
-				return !this->_stats.is_full && this->_off.get == this->_off.put;
+				return !this->is_full() && this->_off.get == this->_off.put;
 			}
 
 			inline bool		eof(void) const {
@@ -64,7 +64,7 @@ namespace nw {
 
 			void		clear(void) {
 				this->_off = {0, 0};
-				this->_stats = {false, false};
+				this->_is_full = false;
 			}
 
 			size_type	in_avail(void) const {
@@ -75,14 +75,14 @@ namespace nw {
 				return (this->size() - this->_off.get) + (this->_off.put);
 			}
 
-			virtual int	sync(const sync_fct_t fct = [](void *, size_type){ return 0; }) {
+			virtual size_type	sync(const sync_fct_t fct = [](void *, size_type){ return 0; }) {
 				return fct(nullptr, 0);
 			}
 
 			size_type	getn(void *b, size_type n) {
 				if (!n || this->is_empty())
 					return 0;
-				this->_stats.is_full = false;
+				this->_is_full = false;
 				if (this->_off.get < this->_off.put) {
 					size_type	get_size = std::min(n, this->_off.put - this->_off.get);
 
@@ -118,7 +118,7 @@ namespace nw {
 					std::memcpy(this->_buf + this->_off.put, b, put_size);
 					this->_off.put += put_size;
 					if (this->_off.get == this->_off.put)
-						this->_stats.is_full = true;
+						this->_is_full = true;
 					return put_size;
 				}
 
@@ -134,18 +134,14 @@ namespace nw {
 					this->_off.put = (this->_off.put + pf_size) % this->size();
 				}
 				if (this->_off.get == this->_off.put)
-					this->_stats.is_full = true;
+					this->_is_full = true;
 				return pb_size + pf_size;
 			}
 
 		protected:
 			int8_t			_buf[SIZE];
-			struct	{
-				uint8_t		is_full	: 1;
-				uint8_t		eof		: 1;
-				uint8_t				: 6;
-			}				_stats;
-			struct	{
+			bool			_is_full;
+			struct			_off_t {
 				pos_type	get;
 				pos_type	put;
 			}				_off;
