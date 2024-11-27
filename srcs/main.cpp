@@ -23,6 +23,8 @@ int	main(int ac, char *av[]) try {
 
 	//setsockopt
 
+	//recv
+
 	//sendto
 	//recvfrom
 

@@ -147,7 +147,7 @@ namespace nw {
 				*const_cast<sockfd_type *>(&src._fd) = -1;
 			}
 
-			//! Destructor
+			//! @brief Destructor
 			//! @details
 			//! If socket is valid close it with no throw behavior
 			virtual	~socket(void) {
@@ -265,7 +265,7 @@ namespace nw {
 			//! @throw nw::system_error if send(2) function fail's
 			size_type	send(
 				obuffer<SIZE> &buf,	//!< nw::obuffer<SIZE>
-				int flags = 0
+				int flags = 0		//!< The flags argument is the bitwise OR of zero or more of flags defined in man 2 send.
 			) {
 				const sockfd_type	fd = this->_fd;
 
@@ -293,10 +293,15 @@ namespace nw {
 
 			//! @tparam TYPE nw::size_type
 			template <size_type SIZE>
+			//! @brief Transmit a message to another socket.
+			//! @details
+			//! The sendto() call is used on a connection-mode (nw::socktype::STREAM, nw::socktype::SEQPACKET) socket, the address of the target is given by addr parameter.
+			//!
+			//! @throw nw::system_error if sendto(2) function fail's
 			size_type	send(
-				obuffer<SIZE> &buf,
-				const addr<FAMILY> &addr,
-				int flags = 0
+				obuffer<SIZE> &buf,			//!< nw::obuffer<SIZE>
+				const addr<FAMILY> &addr,	//!< nw::addr<FAMILY>
+				int flags = 0				//!< The flags argument is the bitwise OR of zero or more of flags defined in man 2 send.
 			) {
 				const sockfd_type	fd = this->_fd;
 
@@ -317,10 +322,16 @@ namespace nw {
 				//sendmsg
 			}
 
+			//! @tparam TYPE nw::size_type
 			template <size_type SIZE>
+			//! @brief Receive a message from another socket.
+			//! @details
+			//! The recv() call is used on both connectionless and connection-oriented sockets.
+			//!
+			//! @throw nw::system_error if recv(2) function fail's
 			size_type	recv(
-				ibuffer<SIZE> &buf,
-				int flags = 0
+				ibuffer<SIZE> &buf,		//!< nw::ibuffer<SIZE>
+				int flags = 0			//!< The flags argument is the bitwise OR of zero or more of flags defined in man 2 recv.
 			) {
 				const sockfd_type	fd = this->_fd;
 
@@ -332,19 +343,32 @@ namespace nw {
 				});
 			}
 
+			//! @tparam TYPE nw::size_type
 			template <size_type SIZE>
+			//! @brief Receive a message from another socket.
+			//! @details
+			//! Call to nw::socket<FAMILY, TYPE>::recv(obuffer<SIZE> &buf, int flags = 0)
+			//!
+			//! @throw nw::system_error if recv(2) function fail's
 			socket<FAMILY, TYPE> &	operator>>(
-				ibuffer<SIZE> &buf
+				ibuffer<SIZE> &buf		//!< nw::ibuffer<SIZE>
 			) {
 				this->recv(buf);
 				return *this;
 			}
 
+			//! @tparam TYPE nw::size_type
 			template <size_type SIZE>
+			//! @brief Transmit a message to another socket.
+			//! @details
+			//! The recvfrom() call is used on on both connectionless and connection-oriented sockets.
+			//! The source address is placed in addr if the underlying protocol provides the source address of the message.
+			//!
+			//! @throw nw::system_error if sendto(2) function fail's
 			size_type	recv(
-				ibuffer<SIZE> &buf,
-				const addr<FAMILY> &addr,
-				int flags = 0
+				ibuffer<SIZE> &buf,			//!< nw::ibuffer<SIZE>
+				const addr<FAMILY> &addr,	//!< nw::addr<FAMILY>
+				int flags = 0				//!< The flags argument is the bitwise OR of zero or more of flags defined in man 2 recv.
 			) {
 				typename nw::addr<FAMILY>::type	sa;
 				socklen_type					sa_len = sizeof(nw::addr<FAMILY>::type);
@@ -391,7 +415,7 @@ namespace nw {
 		public:
 			//! @brief Move construct from IPv4 socket
 			socket(
-				socket<sa_family::INET, TYPE> &&src	//!< nw::sa_family::INET nw::socket
+				socket<sa_family::INET, TYPE> &&src		//!< nw::sa_family::INET nw::socket
 			) : socket_storage<sa_family::UNSPEC>(src._type, src._proto, src._fd, src._addr) {
 				*const_cast<sockfd_type *>(&src._fd) = -1;
 			}
